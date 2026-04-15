@@ -2,10 +2,13 @@ import { useState } from "react";
 import type { Player } from "./types";
 import { PlayerRow } from "./PlayerRow";
 import { AddPlayerForm } from "./AddPlayerForm";
+import { GameNameInput } from "./GameNameInput";
+
 
 // Game är den övergripande komponenten som håller all state
 // och logik för att lägga till spelare och ändra poäng
 export function Game() {
+    const [gameName, setGameName] = useState("Skapa Spel");
     const [players, setPlayers] = useState<Player[]>([]);
 
     // lägga till en ny spelare
@@ -32,19 +35,31 @@ export function Game() {
     };
 
     // rendera AddPlayerForm och en PlayerRow för varje spelare
+    // samt en GameNameInput för att sätta spelets namn
     return (
-        <div>
-            <h1>Poängspel</h1>
+        // enkel styling med Tailwind CSS
+        <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
+            <div className="w-full max-w-xl bg-white shadow-md rounded-xl p-6">
+                <h1 className="text-3xl font-bold text-center mb-4">
+                    {gameName}
+                </h1>
 
-            <AddPlayerForm onAddPlayer={addPlayer} />
+                <div className="space-y-3">
+                    <GameNameInput onSetName={setGameName} />
+                    <AddPlayerForm onAddPlayer={addPlayer} />
+                </div>
+                <div className="mt-6 space-y-3">
+                    {players.map((player) => (
+                        <PlayerRow
+                            key={player.id}
+                            player={player}
+                            onChangeScore={changeScore}
+                        />
+                    ))}
+                </div>
 
-            {players.map((p) => (
-                <PlayerRow
-                    key={p.id}
-                    player={p}
-                    onChangeScore={changeScore}
-                />
-            ))}
+            </div>
         </div>
+        
     );
 }
