@@ -26,6 +26,7 @@ export default function ScoreBoard()
         newPlayers[index].score += amount;
         setPlayers(newPlayers);
     }
+    const Message = () => "TODO Lista: - Lägg till spelarhantering (lägg till/ta bort spelare) - Implementera persistent lagring (t.ex. localStorage) - Lägg till återställningsfunktion för poäng - Förbättra UI/UX med bättre styling och layout";
 
     // Rendera poängbrädet med spelarnas namn och poäng, samt knappar för att uppdatera poängen.
     return (
@@ -33,10 +34,15 @@ export default function ScoreBoard()
         {players.map((player, index) => (
             <div key={index}>
                 <h2>{player.name}: {player.score}</h2>
-                <button onClick={() => updateScore(index, 1)}>+1</button>
-                <button onClick={() => updateScore(index, -1)}>-1</button>
+                <button onClick={() => updateScore(index, 1)}>Add 1</button>
+                <button onClick={() => updateScore(index, -1)}>Remove 1</button>
             </div>
         ))}
+        <div>
+            <p>
+                <Message />
+            </p>
+        </div>
     </div>
     );
 }

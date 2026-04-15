@@ -22,3 +22,22 @@ textarea,
 select {
   font: inherit;
 }
+
+/*Template för knappar. (Redigera hur som helst) */
+button{
+  background-color: #00b7ff;
+  color: white;
+  gap: 10px;
+  border: 2px solid black;
+  padding: 1px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*Template för rubriker. H2 är för spelarnas namn och poäng */
+h2{
+  font-size: 1.1rem;
+}
