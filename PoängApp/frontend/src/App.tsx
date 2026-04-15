@@ -1,9 +1,9 @@
-import ScoreBoard from './components/ScoreBoard';
+import { Game } from './components/Game';
 
 function App() {
   return (
     <div>
-      <ScoreBoard />
+      <Game />
     </div>
   );
 }
