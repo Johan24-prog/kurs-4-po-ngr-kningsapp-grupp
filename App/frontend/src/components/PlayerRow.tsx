@@ -11,15 +11,30 @@ type Props = {
 // PlayerRow är "dum" och har ingen egen state, den visar bara det den får via props och skickar upp event när knapparna klickas
 export function PlayerRow({ player, onChangeScore }: Props) {
   return (
-    <div>
-      <h3>{player.name}: {player.score}
-        <button onClick={() => onChangeScore(player.id, 1)}>
-        +
-      </button>
-        <button onClick={() => onChangeScore(player.id, -1)}>
-        -
-      </button>
-      </h3>
+    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div>
+        <h3 className="text-base font-semibold text-slate-900">{player.name}</h3>
+        <p className="text-sm text-slate-600">Poäng: {player.score}</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="h-9 w-9 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition"
+          onClick={() => onChangeScore(player.id, -1)}
+          aria-label={`Minska poäng för ${player.name}`}
+        >
+          -
+        </button>
+        <button
+          type="button"
+          className="h-9 w-9 rounded-lg bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition"
+          onClick={() => onChangeScore(player.id, 1)}
+          aria-label={`Öka poäng för ${player.name}`}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }

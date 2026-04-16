@@ -4,14 +4,14 @@ import { PlayerRow } from "./PlayerRow";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { GameNameInput } from "./GameNameInput";
 import { generateGameId } from "./guid"; 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGameContext } from "../context/GameContext";
 
 
 // Game är den övergripande komponenten som håller all state
 // och logik för att lägga till spelare och ändra poäng
 export function CreateGame() {
-    const [gameName, setGameName] = useState("Skapa Spel");
+    const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
     const navigate = useNavigate();
     const { saveGame } = useGameContext();
@@ -49,17 +49,33 @@ export function CreateGame() {
     // rendera AddPlayerForm och en PlayerRow för varje spelare
     // samt en GameNameInput för att sätta spelets namn
     return (
-        // enkel styling med Tailwind CSS
-        <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
-            <div className="w-full max-w-xl bg-white shadow-md rounded-xl p-6">
-                <h1 className="text-3xl font-bold text-center mb-4">
+        <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
+            <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-slate-200">
+                <div className="flex items-center justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        Skapa spel
+                    </h1>
+                    <Link
+                        to="/"
+                        className="text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                    >
+                        Till startsidan
+                    </Link>
+                </div>
+
+                <p className="mt-2 text-slate-600">
+                    Ange spelnamn och lägg till spelare innan du startar spelet.
+                </p>
+
+                <h2 className="text-2xl font-bold text-center mt-6 mb-4 text-slate-800">
                     {gameName}
-                </h1>
+                </h2>
 
                 <div className="space-y-3">
                     <GameNameInput onSetName={setGameName} />
                     <AddPlayerForm onAddPlayer={addPlayer} />
                 </div>
+
                 <div className="mt-6 space-y-3">
                     {players.map((player) => (
                         <PlayerRow
@@ -69,13 +85,13 @@ export function CreateGame() {
                         />
                     ))}
                 </div>
-                <div>
+                <div className="mt-8">
                     <button
                         type="button"
-                        className="inline-block mt-6 bg-green-300 text-white px-6 py-3 rounded-lg hover:bg-green-400 transition"
+                        className="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition"
                         onClick={handleCreate}
                     >
-                        Starta Spelet
+                        Starta spel
                     </button>
                 </div>
 

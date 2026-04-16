@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { GameNameInput } from "./GameNameInput";
 import { PlayerRow } from "./PlayerRow";
@@ -39,23 +39,33 @@ export function Game() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
-            <div className="w-full max-w-xl bg-white shadow-md rounded-xl p-6">
+        <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
+            <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-slate-200">
+                <div className="flex items-center justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-slate-900">Pågående spel</h1>
+                    <Link
+                        to="/"
+                        className="text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                    >
+                        Till startsidan
+                    </Link>
+                </div>
+
                 <GameNameInput onSetName={handleSetGameName} />
 
-                <h1 className="text-3xl font-bold text-center mb-4">
+                <h2 className="text-2xl font-bold text-center mt-6 mb-4 text-slate-800">
                     {game.gameName}
-                </h1>
+                </h2>
 
                 <AddPlayerForm onAddPlayer={handleAddPlayer} />
 
                 <div className="mt-4">
                     <button
                         type="button"
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                        className="bg-rose-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-rose-600 transition"
                         onClick={handleResetGame}
                     >
-                        Clear/Reset
+                        Rensa/Nollställ
                     </button>
                 </div>
 

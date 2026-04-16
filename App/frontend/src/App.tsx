@@ -5,12 +5,22 @@ import { Game } from './components/Game';
 
 export default function App() {
   return (
-    <div>
+    <div className="min-h-screen bg-slate-100">
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/creategame" element={<CreateGame />} />
         <Route path="/:gameId" element={<Game />} />
-        <Route path="*" element={<h1>404 - Sidan hittades inte</h1>} />
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen flex items-center justify-center p-6">
+              <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+                <h1 className="text-2xl font-bold text-slate-900">Sidan hittades inte</h1>
+                <p className="mt-2 text-slate-600">Kontrollera adressen och försök igen.</p>
+              </div>
+            </div>
+          }
+        />
       </Routes>
     </div>
   );
