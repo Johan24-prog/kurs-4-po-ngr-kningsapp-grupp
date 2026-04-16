@@ -4,6 +4,8 @@ import { PlayerRow } from "./PlayerRow";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { GameNameInput } from "./GameNameInput";
 import { generateGameId } from "./guid"; 
+import { useNavigate } from "react-router-dom";
+import { useGameContext } from "../context/GameContext";
 
 
 // Game är den övergripande komponenten som håller all state
@@ -11,6 +13,15 @@ import { generateGameId } from "./guid";
 export function CreateGame() {
     const [gameName, setGameName] = useState("Skapa Spel");
     const [players, setPlayers] = useState<Player[]>([]);
+    const navigate = useNavigate();
+    const { saveGame } = useGameContext();
+
+    const handleCreate = () => {
+        const gameId = generateGameId();
+        saveGame(gameId, gameName, players);
+        navigate(`/${gameId}`);
+    };
+
 
     // lägga till en ny spelare
     const addPlayer = (name: string) => {
@@ -59,9 +70,13 @@ export function CreateGame() {
                     ))}
                 </div>
                 <div>
-                    <a href={`/${generateGameId()}`} className="inline-block mt-6 bg-green-300 text-white px-6 py-3 rounded-lg hover:bg-green-400 transition">
+                    <button
+                        type="button"
+                        className="inline-block mt-6 bg-green-300 text-white px-6 py-3 rounded-lg hover:bg-green-400 transition"
+                        onClick={handleCreate}
+                    >
                         Starta Spelet
-                    </a>
+                    </button>
                 </div>
 
             </div>
