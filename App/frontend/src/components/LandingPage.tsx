@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function LandingPage() {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 flex justify-center items-center p-6">
+        <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-center p-6">
             <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8 text-center border border-slate-200">
                 <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Poängräknare</p>
                 <h1 className="text-4xl font-bold mt-2 mb-4 text-slate-900">Välkommen!</h1>

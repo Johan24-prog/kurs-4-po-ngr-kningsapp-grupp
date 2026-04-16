@@ -49,7 +49,7 @@ export function CreateGame() {
     // rendera AddPlayerForm och en PlayerRow för varje spelare
     // samt en GameNameInput för att sätta spelets namn
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
+        <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
             <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-slate-200">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-3xl font-bold text-slate-900">
