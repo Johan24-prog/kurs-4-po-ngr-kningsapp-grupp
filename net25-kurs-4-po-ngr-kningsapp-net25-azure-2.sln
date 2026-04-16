@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PoängApp", "PoängApp", "{855F109C-0C3A-FE0A-6BB6-CCE3B37224A7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{855F109C-0C3A-FE0A-6BB6-CCE3B37224A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "PoängApp\backend\Backend.csproj", "{9FF3521E-E03A-A294-EE46-CAF2AB3507C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "App\backend\Backend.csproj", "{9FF3521E-E03A-A294-EE46-CAF2AB3507C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

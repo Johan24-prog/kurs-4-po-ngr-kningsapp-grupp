@@ -1,8 +1,8 @@
 {
-  "name": "poangapp",
+  "name": "app",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm --prefix PoängApp/frontend install && npm --prefix PoängApp/frontend run build"
+    "build": "npm --prefix App/frontend install && npm --prefix App/frontend run build"
   }
 }
