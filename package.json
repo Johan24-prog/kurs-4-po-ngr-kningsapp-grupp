@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "build": "npm --prefix App/frontend install && npm --prefix App/frontend run build"
+  },
+  "dependencies": {
+    "react-router-dom": "^7.14.1"
   }
 }
