@@ -93,6 +93,8 @@ export function CreateGame() {
                     >
                         Starta spel
                     </button>
+
+                    <input type="checkbox" />
                 </div>
 
             </div>
