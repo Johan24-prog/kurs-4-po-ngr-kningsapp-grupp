@@ -15,8 +15,25 @@ export function CreateGame() {
     const navigate = useNavigate();
     const { saveGame } = useGameContext();
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         const gameId = generateGameId();
+
+        try {
+            await fetch("/api/games", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: gameId,
+                    gameName,
+                    players,
+                }),
+            });
+        } catch {
+            // Behåll frontend-flödet även om backend-endpointen inte är klar ännu.
+        }
+
         saveGame(gameId, gameName, players);
         navigate(`/${gameId}`);
     };
@@ -78,7 +95,7 @@ export function CreateGame() {
                         className="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition"
                         onClick={handleCreate}
                     >
-                        Starta spel
+                        Skapa match
                     </button>
 
                     <input type="checkbox" />

@@ -41,8 +41,8 @@ export function Game() {
     return (
         <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
             <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-slate-200">
-                <div className="flex items-center justify-between gap-4">
-                    <h1 className="text-3xl font-bold text-slate-900">Pågående spel</h1>
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <h1 className="text-3xl font-bold text-slate-900 -mt-1">Pågående spel</h1>
                     <Link
                         to="/"
                         className="text-sm font-medium text-slate-600 hover:text-slate-900 transition"
