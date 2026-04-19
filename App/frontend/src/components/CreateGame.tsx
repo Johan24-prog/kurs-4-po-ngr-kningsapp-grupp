@@ -8,8 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useGameContext } from "../context/GameContext";
 
 
-// Game är den övergripande komponenten som håller all state
-// och logik för att lägga till spelare och ändra poäng
+// CreateGame håller state för spelnamn och spelare innan spelet startas.
 export function CreateGame() {
     const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
@@ -33,17 +32,6 @@ export function CreateGame() {
                 score: 0,
             },
         ]);
-    };
-
-    // ändra poäng för en spelare
-    const changeScore = (id: string, delta: number) => {
-        setPlayers((prev) =>
-            prev.map((p) =>
-                p.id === id
-                    ? { ...p, score: p.score + delta }
-                    : p
-            )
-        );
     };
 
     // rendera AddPlayerForm och en PlayerRow för varje spelare
@@ -81,7 +69,6 @@ export function CreateGame() {
                         <PlayerRow
                             key={player.id}
                             player={player}
-                            onChangeScore={changeScore}
                         />
                     ))}
                 </div>
