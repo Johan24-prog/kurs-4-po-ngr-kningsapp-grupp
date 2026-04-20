@@ -29,6 +29,7 @@ app.MapGet("/api/games", async (AppDbContext db) =>
     return Results.Ok(games.Select(ToGameResponse));
 });
 
+// Hämta ett specifikt spel med dess spelare. Returnerar 404 om spelet inte finns.
 app.MapGet("/api/games/{id:guid}", async (Guid id, AppDbContext db) =>
 {
     var game = await db.Games
@@ -39,6 +40,7 @@ app.MapGet("/api/games/{id:guid}", async (Guid id, AppDbContext db) =>
     return game is not null ? Results.Ok(ToGameResponse(game)) : Results.NotFound();
 });
 
+// Skapa ett nytt spel. Returnerar 409 om spelet redan finns.
 app.MapPost("/api/games", async (CreateOrUpdateGameDto dto, AppDbContext db) =>
 {
     var exists = await db.Games.AnyAsync(g => g.Id == dto.Id);
@@ -54,6 +56,7 @@ app.MapPost("/api/games", async (CreateOrUpdateGameDto dto, AppDbContext db) =>
     return Results.Created("/api/games/" + game.Id.ToString(), ToGameResponse(game));
 });
 
+// Uppdatera ett spel. Om spelet inte finns skapas det.
 app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, AppDbContext db) =>
 {
     var existing = await db.Games
@@ -88,7 +91,8 @@ app.MapFallbackToFile("index.html");
 
 app.Run();
 
-
+// --- Mapping functions ---
+// Mappar en CreateOrUpdateGameDto till en Game-entitet, inklusive dess spelare
 static Game ToGameEntity(CreateOrUpdateGameDto dto)
 {
     return new Game
@@ -107,6 +111,7 @@ static Game ToGameEntity(CreateOrUpdateGameDto dto)
     };
 }
 
+// Mappar en Game-entitet till en GameResponseDto, inklusive dess spelare.
 static GameResponseDto ToGameResponse(Game game)
 {
     return new GameResponseDto(
@@ -118,6 +123,8 @@ static GameResponseDto ToGameResponse(Game game)
     );
 }
 
+// --- DTO records ---
+// DTOs (Data Transfer Objects) används för att definiera strukturen på data som skickas till och från API:et.
 public record CreateOrUpdateGameDto(
     Guid Id,
     string GameName,
@@ -126,12 +133,14 @@ public record CreateOrUpdateGameDto(
     List<CreateOrUpdatePlayerDto>? Players
 );
 
+// DTO för att skapa eller uppdatera en spelare. Inkluderar Id (för uppdatering), namn och poäng.
 public record CreateOrUpdatePlayerDto(
     string Id,
     string Name,
     int Score
 );
 
+// DTO för att representera ett spel i API-responsen. Inkluderar spelets Id, namn, regler och en lista över spelare.
 public record GameResponseDto(
     Guid Id,
     string GameName,
@@ -140,6 +149,7 @@ public record GameResponseDto(
     List<PlayerResponseDto> Players
 );
 
+// DTO för att representera en spelare i API-responsen. Inkluderar spelarens Id, namn och poäng.
 public record PlayerResponseDto(
     string Id,
     string Name,
