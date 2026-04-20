@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Player } from "../components/types";
 
 // Intern state per match.
@@ -33,8 +33,6 @@ type GameContextType = {
   resetGame: (gameId: string) => void;
 };
 
-const STORAGE_KEY = "gamesById";
-
 // Startvärde för nya matcher.
 function getDefaultGame(): GameState {
   return {
@@ -46,45 +44,116 @@ function getDefaultGame(): GameState {
 
 const GameContext = createContext<GameContextType | null>(null);
 
+type ApiGame = {
+  id: string;
+  gameName: string;
+  allowAddingPlayers: boolean;
+  players: Player[];
+};
+
+function toGameState(apiGame: ApiGame): GameState {
+  return {
+    gameName: apiGame.gameName,
+    players: apiGame.players,
+    allowAddingPlayers: apiGame.allowAddingPlayers,
+  };
+}
+
+function toApiPayload(gameId: string, game: GameState) {
+  return {
+    id: gameId,
+    gameName: game.gameName,
+    higherIsBetter: true,
+    allowAddingPlayers: game.allowAddingPlayers,
+    players: game.players,
+  };
+}
+
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [gamesById, setGamesById] = useState<GamesById>({});
 
-  // Läser tidigare sparad state från localStorage vid första renderingen.
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-
+  const persistGame = useCallback(async (gameId: string, game: GameState) => {
     try {
-      const parsed = JSON.parse(stored) as GamesById;
-      setGamesById(parsed);
+      await fetch(`/api/games/${gameId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(toApiPayload(gameId, game)),
+      });
     } catch {
-      setGamesById({});
+      // Appen fungerar lokalt i UI även om nätverket tillfälligt misslyckas.
     }
   }, []);
 
-  // Skriver alltid senaste state till localStorage.
+  // Laddar alla spel från backend när appen startar.
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(gamesById));
-  }, [gamesById]);
+    let cancelled = false;
 
-  const saveGame = (
+    async function loadGames() {
+      try {
+        const response = await fetch("/api/games");
+        if (!response.ok) return;
+
+        const games = (await response.json()) as ApiGame[];
+        if (cancelled) return;
+
+        const nextState: GamesById = {};
+        for (const game of games) {
+          nextState[game.id] = toGameState(game);
+        }
+
+        setGamesById(nextState);
+      } catch {
+        // Ingen åtgärd behövs här, användaren kan fortfarande skapa nya spel.
+      }
+    }
+
+    void loadGames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const saveGame = useCallback((
     gameId: string,
     gameName: string,
     players: Player[],
     allowAddingPlayers: boolean
   ) => {
+    const nextGame: GameState = {
+      gameName,
+      players,
+      allowAddingPlayers,
+    };
+
     // Skapar eller skriver över en match med inkommande data.
     setGamesById((prev) => ({
       ...prev,
-      [gameId]: {
-        gameName,
-        players,
-        allowAddingPlayers,
-      },
+      [gameId]: nextGame,
     }));
-  };
 
-  const ensureGame = (gameId: string) => {
+    void (async () => {
+      try {
+        const createResponse = await fetch("/api/games", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(toApiPayload(gameId, nextGame)),
+        });
+
+        if (!createResponse.ok) {
+          await persistGame(gameId, nextGame);
+        }
+      } catch {
+        // Behåll UI-state även om backend inte svarar just nu.
+      }
+    })();
+  }, [persistGame]);
+
+  const ensureGame = useCallback((gameId: string) => {
     // Säkerställer att matchen finns, exempelvis vid direktlänk till route.
     setGamesById((prev) => {
       if (prev[gameId]) return prev;
@@ -94,74 +163,129 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         [gameId]: getDefaultGame(),
       };
     });
-  };
 
-  const setGameName = (gameId: string, gameName: string) => {
-    // Uppdaterar enbart namnet och behåller övriga fält.
-    setGamesById((prev) => ({
-      ...prev,
-      [gameId]: {
+    void (async () => {
+      try {
+        const response = await fetch(`/api/games/${gameId}`);
+        if (!response.ok) return;
+
+        const game = (await response.json()) as ApiGame;
+        setGamesById((prev) => ({
+          ...prev,
+          [gameId]: toGameState(game),
+        }));
+      } catch {
+        // Ingen extra åtgärd. Lokal fallback finns redan i state.
+      }
+    })();
+  }, []);
+
+  const setGameName = useCallback((gameId: string, gameName: string) => {
+    let nextGame: GameState | null = null;
+
+    setGamesById((prev) => {
+      // Uppdaterar enbart namnet och behåller övriga fält.
+      const updated = {
         ...(prev[gameId] ?? getDefaultGame()),
         gameName,
-      },
-    }));
-  };
+      };
+      nextGame = updated;
 
-  const addPlayer = (gameId: string, playerName: string) => {
+      return {
+        ...prev,
+        [gameId]: updated,
+      };
+    });
+
+    if (nextGame) {
+      void persistGame(gameId, nextGame);
+    }
+  }, [persistGame]);
+
+  const addPlayer = useCallback((gameId: string, playerName: string) => {
     const trimmedName = playerName.trim();
     if (!trimmedName) return;
+
+    let nextGame: GameState | null = null;
 
     setGamesById((prev) => {
       const game = prev[gameId] ?? getDefaultGame();
       // Respekterar matchens inställning för om nya spelare får läggas till.
       if (!game.allowAddingPlayers) return prev;
 
+      const updated = {
+        ...game,
+        players: [
+          ...game.players,
+          {
+            id: crypto.randomUUID(),
+            name: trimmedName,
+            score: 0,
+          },
+        ],
+      };
+      nextGame = updated;
+
       return {
         ...prev,
-        [gameId]: {
-          ...game,
-          players: [
-            ...game.players,
-            {
-              id: crypto.randomUUID(),
-              name: trimmedName,
-              score: 0,
-            },
-          ],
-        },
+        [gameId]: updated,
       };
     });
-  };
 
-  const changeScore = (gameId: string, playerId: string, delta: number) => {
+    if (nextGame) {
+      void persistGame(gameId, nextGame);
+    }
+  }, [persistGame]);
+
+  const changeScore = useCallback((gameId: string, playerId: string, delta: number) => {
+    let nextGame: GameState | null = null;
+
     // Uppdaterar poäng för en enskild spelare.
     setGamesById((prev) => {
       const game = prev[gameId] ?? getDefaultGame();
 
+      const updated = {
+        ...game,
+        players: game.players.map((player) =>
+          player.id === playerId
+            ? { ...player, score: player.score + delta }
+            : player
+        ),
+      };
+      nextGame = updated;
+
       return {
         ...prev,
-        [gameId]: {
-          ...game,
-          players: game.players.map((player) =>
-            player.id === playerId
-              ? { ...player, score: player.score + delta }
-              : player
-          ),
-        },
+        [gameId]: updated,
       };
     });
-  };
 
-  const resetGame = (gameId: string) => {
+    if (nextGame) {
+      void persistGame(gameId, nextGame);
+    }
+  }, [persistGame]);
+
+  const resetGame = useCallback((gameId: string) => {
+    let nextGame: GameState | null = null;
+
     // Nollställer matchen men bevarar om spelare får läggas till efter start.
-    setGamesById((prev) => ({
-      ...prev,
-      [gameId]: {
+    setGamesById((prev) => {
+      const updated = {
         ...getDefaultGame(),
         allowAddingPlayers: prev[gameId]?.allowAddingPlayers ?? true,
-      },
-    }));
-  };
+      };
+      nextGame = updated;
+
+      return {
+        ...prev,
+        [gameId]: updated,
+      };
+    });
+
+    if (nextGame) {
+      void persistGame(gameId, nextGame);
+    }
+  }, [persistGame]);
 
   const value = useMemo(
     // Memoiserar context-värdet för att undvika onödiga re-renders.
@@ -174,7 +298,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       changeScore,
       resetGame,
     }),
-    [gamesById]
+    [gamesById, saveGame, ensureGame, setGameName, addPlayer, changeScore, resetGame]
   );
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

@@ -18,25 +18,7 @@ export function CreateGame() {
 
     const handleCreate = async () => {
         const gameId = generateGameId();
-
-        try {
-            // Försöker spara till backend när endpoint finns.
-            await fetch("/api/games", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    id: gameId,
-                    gameName,
-                    players,
-                    allowAddingPlayers,
-                }),
-            });
-        } catch {
-            // Behåll frontend-flödet även om backend-endpointen inte är klar ännu.
-        }
-
+        
         saveGame(gameId, gameName, players, allowAddingPlayers);
         navigate(`/${gameId}`);
     };

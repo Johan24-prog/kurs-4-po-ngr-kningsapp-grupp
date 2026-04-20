@@ -1,18 +1,24 @@
-﻿namespace App.Database
-{
-    public static class Database
-    {
-        private static Dictionary<Guid, Game> games = new Dictionary<Guid, Game>();
+﻿using Microsoft.EntityFrameworkCore;
 
-        public static void AddGame(Game game)
+namespace App.Database
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
         {
-            games[game.Id] = game;
         }
 
-        public static Game? GetGame(Guid id)
+        public DbSet<Game> Games => Set<Game>();
+        public DbSet<Player> Players => Set<Player>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            games.TryGetValue(id, out var game);
-            return game;
+            modelBuilder.Entity<Game>()
+                .HasMany(g => g.Players)
+                .WithOne()
+                .HasForeignKey(p => p.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

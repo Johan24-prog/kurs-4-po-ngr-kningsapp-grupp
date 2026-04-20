@@ -134,3 +134,6 @@ _NCrunch*
 
 #Other stuff
 /.vs
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
