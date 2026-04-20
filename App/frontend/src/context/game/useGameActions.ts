@@ -110,6 +110,29 @@ export function useGameActions({ setGamesById }: Props) {
     }
   }, [setGamesById]);
 
+  // Tar bort en spelare från aktuell match.
+  const removePlayer = useCallback((gameId: string, playerId: string) => {
+    let nextGame: GameState | null = null;
+
+    setGamesById((prev) => {
+      const game = prev[gameId] ?? getDefaultGame();
+      const updated = {
+        ...game,
+        players: game.players.filter((player) => player.id !== playerId),
+      };
+      nextGame = updated;
+
+      return {
+        ...prev,
+        [gameId]: updated,
+      };
+    });
+
+    if (nextGame) {
+      void persistGame(gameId, nextGame);
+    }
+  }, [setGamesById]);
+
   // Justerar poäng för en spelare.
   const changeScore = useCallback((gameId: string, playerId: string, delta: number) => {
     let nextGame: GameState | null = null;
@@ -138,28 +161,6 @@ export function useGameActions({ setGamesById }: Props) {
     }
   }, [setGamesById]);
 
-  // Nollställer spel men bevarar inställningen för att lägga till spelare.
-  const resetGame = useCallback((gameId: string) => {
-    let nextGame: GameState | null = null;
-
-    setGamesById((prev) => {
-      const updated = {
-        ...getDefaultGame(),
-        allowAddingPlayers: prev[gameId]?.allowAddingPlayers ?? true,
-      };
-      nextGame = updated;
-
-      return {
-        ...prev,
-        [gameId]: updated,
-      };
-    });
-
-    if (nextGame) {
-      void persistGame(gameId, nextGame);
-    }
-  }, [setGamesById]);
-
   // Returneras memoiserat för att undvika onödiga rerenders i consumers.
   return useMemo(
     () => ({
@@ -167,9 +168,9 @@ export function useGameActions({ setGamesById }: Props) {
       ensureGame,
       setGameName,
       addPlayer,
+      removePlayer,
       changeScore,
-      resetGame,
     }),
-    [saveGame, ensureGame, setGameName, addPlayer, changeScore, resetGame]
+    [saveGame, ensureGame, setGameName, addPlayer, removePlayer, changeScore]
   );
 }

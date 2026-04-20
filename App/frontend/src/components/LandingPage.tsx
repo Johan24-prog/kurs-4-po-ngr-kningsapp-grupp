@@ -8,27 +8,34 @@ export function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-center p-6">
-            <div className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8 text-center border border-slate-200">
-                <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Poängräknare</p>
-                <h1 className="text-4xl font-bold mt-2 mb-4 text-slate-900">Välkommen!</h1>
-                <p className="text-lg mb-8 text-slate-700">
-                    Skapa ett spel, lägg till spelare och börja räkna poäng direkt.
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-center p-6">
+            <div className="w-full max-w-lg bg-linear-to-b from-white to-slate-50/50 shadow-2xl rounded-3xl p-8 text-center border border-slate-200/50">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-linear-to-r from-sky-500 to-emerald-500 mb-4 mx-auto">
+                    <span className="text-xl font-bold text-white">🎯</span>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-sky-700 mb-2">Poängräknare</p>
+                <h1 className="text-5xl font-bold mt-2 mb-3 bg-linear-to-r from-slate-900 to-sky-700 bg-clip-text text-transparent">Välkommen!</h1>
+                <p className="text-lg mb-8 text-slate-600 leading-relaxed">
+                    Skapa ett spel, lägg till spelare och börja räkna poäng direkt. Enkelt och snabbt!
                 </p>
-                <div className="mb-5 text-left">
-                    <p className="mb-2 text-sm font-medium text-slate-600">Fortsätt ett befintligt spel</p>
+
+                <div className="mb-6 p-4 rounded-2xl bg-sky-50/50 border border-sky-200/50">
+                    <p className="mb-3 text-sm font-bold text-sky-700 uppercase tracking-wide">📋 Fortsätt ett befintligt spel</p>
                     <GameSearchInput
                         gamesById={gamesById}
                         currentGameId=""
                         onSelectGame={(selectedGameId: string) => navigate(`/${selectedGameId}`)}
                     />
                 </div>
-                <Link
-                    to="/creategame"
-                    className="inline-flex items-center justify-center bg-sky-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-700 transition"
-                >
-                    Skapa spel
-                </Link>
+
+                <div className="space-y-3">
+                    <Link
+                        to="/creategame"
+                        className="inline-flex items-center justify-center w-full bg-linear-to-b from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold shadow-lg transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-95"
+                    >
+                        ✨ Skapa nytt spel
+                    </Link>
+                </div>
             </div>
         </div>
     );

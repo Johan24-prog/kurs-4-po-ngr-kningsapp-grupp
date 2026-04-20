@@ -22,8 +22,8 @@ export type GameContextType = {
   ensureGame: (gameId: string) => void;
   setGameName: (gameId: string, gameName: string) => void;
   addPlayer: (gameId: string, playerName: string) => void;
+  removePlayer: (gameId: string, playerId: string) => void;
   changeScore: (gameId: string, playerId: string, delta: number) => void;
-  resetGame: (gameId: string) => void;
 };
 
 // Struktur på data som kommer tillbaka från backend.
