@@ -1,10 +1,28 @@
+using App;
 using App.Database;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=scoreboard.db"));
+
+builder.Services.AddSignalR();
+//this was needed to connect to SignalR from "a different origin"
+//which i assume is because i was testing it with a seperate html file
+//Try removing CORS later when SignalR is implemented in frontend to see if it still works
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true);
+    });
+});
 
 var app = builder.Build();
 
@@ -17,8 +35,11 @@ using (var scope = app.Services.CreateScope())
 // Serve React build output from wwwroot
 app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseCors();
 
 // --- Minimal API endpoints ---
+app.MapHub<GameHub>("/gamehub");
+
 app.MapGet("/api/games", async (AppDbContext db) =>
 {
     var games = await db.Games
@@ -57,7 +78,7 @@ app.MapPost("/api/games", async (CreateOrUpdateGameDto dto, AppDbContext db) =>
 });
 
 // Uppdatera ett spel. Om spelet inte finns skapas det.
-app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, AppDbContext db) =>
+app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, AppDbContext db, IHubContext<GameHub> hubContext) =>
 {
     var existing = await db.Games
         .Include(g => g.Players)
@@ -81,6 +102,10 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
         Name = p.Name,
         Score = p.Score,
     }).ToList() ?? new List<Player>();
+
+    await hubContext.Clients
+        .Group($"game-{id}")
+        .SendAsync("GameUpdated");
 
     await db.SaveChangesAsync();
     return Results.Ok(ToGameResponse(existing));
