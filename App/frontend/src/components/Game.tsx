@@ -1,13 +1,15 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
-import { GameNameInput } from "./GameNameInput";
+import { GameSearchInput } from "./GameSearchInput.tsx";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
+import { useNavigate } from "react-router-dom";
 
 export function Game() {
     const { gameId } = useParams();
-    const { gamesById, ensureGame, setGameName, addPlayer, changeScore, resetGame } = useGameContext();
+    const { gamesById, ensureGame, addPlayer, changeScore, resetGame } = useGameContext();
+    const navigate = useNavigate();
 
     // Säkerställer att spelobjektet finns även vid direktlänk till route.
     useEffect(() => {
@@ -20,10 +22,6 @@ export function Game() {
     }
 
     const game = gamesById[gameId] ?? { gameName: "Spel", players: [] };
-
-    const handleSetGameName = (name: string) => {
-        setGameName(gameId, name);
-    };
 
     const handleAddPlayer = (name: string) => {
         addPlayer(gameId, name);
@@ -51,7 +49,14 @@ export function Game() {
                     </Link>
                 </div>
 
-                <GameNameInput onSetName={handleSetGameName} />
+                <GameSearchInput
+                    gamesById={gamesById}
+                    currentGameId={gameId}
+                    onSelectGame={(selectedGameId: string) => {
+                        if (selectedGameId === gameId) return;
+                        navigate(`/${selectedGameId}`);
+                    }}
+                />
 
                 <h2 className="text-2xl font-bold text-center mt-6 mb-4 text-slate-800">
                     {game.gameName}
