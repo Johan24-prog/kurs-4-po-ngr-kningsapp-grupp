@@ -1,14 +1,17 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Player } from "../components/types";
 
+// Intern state per match.
 type GameState = {
   gameName: string;
   players: Player[];
   allowAddingPlayers: boolean;
 };
 
+// Alla matcher lagras i ett objekt med gameId som nyckel.
 type GamesById = Record<string, GameState>;
 
+// Publikt API som komponenter använder via context.
 type GameContextType = {
   gamesById: GamesById;
   // Sparar ett nytt spel med namn och spelare.
@@ -32,6 +35,7 @@ type GameContextType = {
 
 const STORAGE_KEY = "gamesById";
 
+// Startvärde för nya matcher.
 function getDefaultGame(): GameState {
   return {
     gameName: "Spel",
@@ -69,6 +73,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     players: Player[],
     allowAddingPlayers: boolean
   ) => {
+    // Skapar eller skriver över en match med inkommande data.
     setGamesById((prev) => ({
       ...prev,
       [gameId]: {
@@ -80,6 +85,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const ensureGame = (gameId: string) => {
+    // Säkerställer att matchen finns, exempelvis vid direktlänk till route.
     setGamesById((prev) => {
       if (prev[gameId]) return prev;
 
@@ -91,6 +97,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setGameName = (gameId: string, gameName: string) => {
+    // Uppdaterar enbart namnet och behåller övriga fält.
     setGamesById((prev) => ({
       ...prev,
       [gameId]: {
@@ -106,6 +113,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     setGamesById((prev) => {
       const game = prev[gameId] ?? getDefaultGame();
+      // Respekterar matchens inställning för om nya spelare får läggas till.
       if (!game.allowAddingPlayers) return prev;
 
       return {
@@ -126,6 +134,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const changeScore = (gameId: string, playerId: string, delta: number) => {
+    // Uppdaterar poäng för en enskild spelare.
     setGamesById((prev) => {
       const game = prev[gameId] ?? getDefaultGame();
 
@@ -144,6 +153,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetGame = (gameId: string) => {
+    // Nollställer matchen men bevarar om spelare får läggas till efter start.
     setGamesById((prev) => ({
       ...prev,
       [gameId]: {
@@ -154,6 +164,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo(
+    // Memoiserar context-värdet för att undvika onödiga re-renders.
     () => ({
       gamesById,
       saveGame,
@@ -170,6 +181,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useGameContext() {
+  // Hjälpfunktion så komponenter får ett typat context-värde.
   const context = useContext(GameContext);
 
   if (!context) {

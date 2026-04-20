@@ -1,12 +1,15 @@
 import { useState } from "react";
 
+// Props för inputfältet som skickar tillbaka skrivet spelnamn.
 type Props = {
   onSetName: (name: string) => void;
 };
 
+// Enkel kontrollerad input för att skriva ett spelnamn.
 export function GameNameInput({ onSetName }: Props) {
   const [name, setName] = useState("");
 
+  // Synkar lokalt input-state och meddelar föräldrakomponenten.
   const handleChange = (value: string) => {
     setName(value);
     onSetName(value);

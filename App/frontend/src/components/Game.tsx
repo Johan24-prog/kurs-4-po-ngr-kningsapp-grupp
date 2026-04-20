@@ -6,6 +6,7 @@ import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
 import { useNavigate } from "react-router-dom";
 
+// Visar en pågående match baserat på gameId i URL:en.
 export function Game() {
     const { gameId } = useParams();
     const { gamesById, ensureGame, addPlayer, changeScore, resetGame } = useGameContext();
@@ -21,13 +22,16 @@ export function Game() {
         return <h1>Ogiltigt spel-id</h1>;
     }
 
+    // Fallback används om route finns men spelet ännu inte hunnit laddas in.
     const game = gamesById[gameId] ?? { gameName: "Spel", players: [] };
     const canAddPlayers = game.allowAddingPlayers ?? true;
 
+    // Lägger till spelare i aktuell match via context.
     const handleAddPlayer = (name: string) => {
         addPlayer(gameId, name);
     };
 
+    // Uppdaterar poäng för en specifik spelare.
     const handleChangeScore = (playerId: string, delta: number) => {
         changeScore(gameId, playerId, delta);
     };
@@ -53,6 +57,7 @@ export function Game() {
                 <GameSearchInput
                     gamesById={gamesById}
                     currentGameId={gameId}
+                    // Byte av aktiv match sker genom navigation till valt gameId.
                     onSelectGame={(selectedGameId: string) => {
                         if (selectedGameId === gameId) return;
                         navigate(`/${selectedGameId}`);

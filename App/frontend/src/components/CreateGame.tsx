@@ -7,9 +7,9 @@ import { generateGameId } from "./guid";
 import { Link, useNavigate } from "react-router-dom";
 import { useGameContext } from "../context/GameContext";
 
-
-// CreateGame håller state för spelnamn och spelare innan spelet startas.
+// Hanterar skapandet av en ny match innan användaren går till spelsidan.
 export function CreateGame() {
+    // Lokalt state för nya matchens namn, spelare och om spelare får läggas till senare.
     const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
     const [allowAddingPlayers, setAllowAddingPlayers] = useState(true);
@@ -20,6 +20,7 @@ export function CreateGame() {
         const gameId = generateGameId();
 
         try {
+            // Försöker spara till backend när endpoint finns.
             await fetch("/api/games", {
                 method: "POST",
                 headers: {
@@ -40,8 +41,7 @@ export function CreateGame() {
         navigate(`/${gameId}`);
     };
 
-
-    // lägga till en ny spelare
+    // Lägger till en spelare i den lokala listan före matchen skapas.
     const addPlayer = (name: string) => {
         setPlayers((prev) => [
             ...prev,
@@ -53,8 +53,7 @@ export function CreateGame() {
         ]);
     };
 
-    // rendera AddPlayerForm och en PlayerRow för varje spelare
-    // samt en GameNameInput för att sätta spelets namn
+    // Visar formulär för matchuppsättning och sammanställning av tillagda spelare.
     return (
         <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-start p-6 sm:p-8">
             <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 sm:p-8 border border-slate-200">

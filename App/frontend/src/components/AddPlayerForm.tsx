@@ -1,14 +1,16 @@
 import { useState } from "react";
 
+// Props för formuläret som lägger till en spelare.
 type Props = {
   onAddPlayer: (name: string) => void;
   disabled?: boolean;
 };
 
-// AddPlayerForm är en komponent som visar ett formulär för att lägga till en ny spelare
+// Visar input + knapp för att lägga till en spelare i aktuell match.
 export function AddPlayerForm({ onAddPlayer, disabled = false }: Props) {
   const [name, setName] = useState("");
 
+  // Stoppar sidomladdning och skickar upp spelarens namn till föräldern.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (disabled) return;
@@ -16,12 +18,9 @@ export function AddPlayerForm({ onAddPlayer, disabled = false }: Props) {
     if (!name.trim()) return;
 
     onAddPlayer(name);
-    setName(""); // rensa input
+    setName("");
   };
 
-  // håller sitt eget input-state
-  // skickar upp namnet till Game
-  // rensar input efter submit
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <input

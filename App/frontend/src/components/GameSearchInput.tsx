@@ -1,18 +1,22 @@
 import { useMemo, useState } from "react";
 
+// Minsta informationen som behövs för att visa ett spel i söklistan.
 type GameSummary = {
   gameName: string;
 };
 
+// Props för sökfältet som listar och väljer befintliga spel.
 type Props = {
   gamesById: Record<string, GameSummary>;
   currentGameId: string;
   onSelectGame: (gameId: string) => void;
 };
 
+// Sökfält som filtrerar sparade spel på namn eller id.
 export function GameSearchInput({ gamesById, currentGameId, onSelectGame }: Props) {
   const [query, setQuery] = useState("");
 
+  // Normaliserar dictionary till en lista som är enkel att filtrera och rendera.
   const searchableGames = useMemo(
     () =>
       Object.entries(gamesById).map(([id, game]) => ({
@@ -24,6 +28,7 @@ export function GameSearchInput({ gamesById, currentGameId, onSelectGame }: Prop
 
   const normalizedQuery = query.trim().toLowerCase();
 
+  // Filtrerar listan först när användaren har skrivit en sökterm.
   const filteredGames = useMemo(() => {
     if (!normalizedQuery) {
       return searchableGames;

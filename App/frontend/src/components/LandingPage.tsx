@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+// Enkel startsida med länk till flödet för att skapa en ny match.
 export function LandingPage() {
     return (
         <div className="min-h-screen bg-linear-to-b from-slate-100 to-slate-200 flex justify-center items-center p-6">
