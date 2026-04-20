@@ -4,6 +4,7 @@ import type { Player } from "../components/types";
 type GameState = {
   gameName: string;
   players: Player[];
+  allowAddingPlayers: boolean;
 };
 
 type GamesById = Record<string, GameState>;
@@ -11,7 +12,12 @@ type GamesById = Record<string, GameState>;
 type GameContextType = {
   gamesById: GamesById;
   // Sparar ett nytt spel med namn och spelare.
-  saveGame: (gameId: string, gameName: string, players: Player[]) => void;
+  saveGame: (
+    gameId: string,
+    gameName: string,
+    players: Player[],
+    allowAddingPlayers: boolean
+  ) => void;
   // Ser till att ett spel finns för route-id:t.
   ensureGame: (gameId: string) => void;
   // Uppdaterar spelnamn för ett specifikt spel.
@@ -30,6 +36,7 @@ function getDefaultGame(): GameState {
   return {
     gameName: "Spel",
     players: [],
+    allowAddingPlayers: true,
   };
 }
 
@@ -56,12 +63,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gamesById));
   }, [gamesById]);
 
-  const saveGame = (gameId: string, gameName: string, players: Player[]) => {
+  const saveGame = (
+    gameId: string,
+    gameName: string,
+    players: Player[],
+    allowAddingPlayers: boolean
+  ) => {
     setGamesById((prev) => ({
       ...prev,
       [gameId]: {
         gameName,
         players,
+        allowAddingPlayers,
       },
     }));
   };
@@ -93,6 +106,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     setGamesById((prev) => {
       const game = prev[gameId] ?? getDefaultGame();
+      if (!game.allowAddingPlayers) return prev;
 
       return {
         ...prev,
@@ -132,7 +146,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = (gameId: string) => {
     setGamesById((prev) => ({
       ...prev,
-      [gameId]: getDefaultGame(),
+      [gameId]: {
+        ...getDefaultGame(),
+        allowAddingPlayers: prev[gameId]?.allowAddingPlayers ?? true,
+      },
     }));
   };
 

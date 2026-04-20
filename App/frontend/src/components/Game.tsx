@@ -22,6 +22,7 @@ export function Game() {
     }
 
     const game = gamesById[gameId] ?? { gameName: "Spel", players: [] };
+    const canAddPlayers = game.allowAddingPlayers ?? true;
 
     const handleAddPlayer = (name: string) => {
         addPlayer(gameId, name);
@@ -62,7 +63,13 @@ export function Game() {
                     {game.gameName}
                 </h2>
 
-                <AddPlayerForm onAddPlayer={handleAddPlayer} />
+                <AddPlayerForm onAddPlayer={handleAddPlayer} disabled={!canAddPlayers} />
+
+                {!canAddPlayers && (
+                    <p className="mt-2 text-sm text-slate-500">
+                        Spelare kan inte läggas till efter att matchen har skapats.
+                    </p>
+                )}
 
                 <div className="mt-4">
                     <button

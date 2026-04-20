@@ -12,6 +12,7 @@ import { useGameContext } from "../context/GameContext";
 export function CreateGame() {
     const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
+    const [allowAddingPlayers, setAllowAddingPlayers] = useState(true);
     const navigate = useNavigate();
     const { saveGame } = useGameContext();
 
@@ -28,13 +29,14 @@ export function CreateGame() {
                     id: gameId,
                     gameName,
                     players,
+                    allowAddingPlayers,
                 }),
             });
         } catch {
             // Behåll frontend-flödet även om backend-endpointen inte är klar ännu.
         }
 
-        saveGame(gameId, gameName, players);
+        saveGame(gameId, gameName, players, allowAddingPlayers);
         navigate(`/${gameId}`);
     };
 
@@ -98,7 +100,15 @@ export function CreateGame() {
                         Skapa match
                     </button>
 
-                    <input type="checkbox" />
+                    <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
+                        <input
+                            type="checkbox"
+                            checked={allowAddingPlayers}
+                            onChange={(e) => setAllowAddingPlayers(e.target.checked)}
+                            className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                        />
+                        Tillåt att lägga till spelare efter att matchen skapats
+                    </label>
                 </div>
 
             </div>
