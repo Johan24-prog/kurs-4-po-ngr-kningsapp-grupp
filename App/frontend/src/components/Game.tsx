@@ -1,16 +1,13 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
-import { GameSearchInput } from "./GameSearchInput.tsx";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
-import { useNavigate } from "react-router-dom";
 
 // Visar en pågående match baserat på gameId i URL:en.
 export function Game() {
     const { gameId } = useParams();
     const { gamesById, ensureGame, addPlayer, changeScore, resetGame } = useGameContext();
-    const navigate = useNavigate();
 
     // Säkerställer att spelobjektet finns även vid direktlänk till route.
     useEffect(() => {
@@ -53,19 +50,6 @@ export function Game() {
                         Till startsidan
                     </Link>
                 </div>
-
-                <GameSearchInput
-                    gamesById={gamesById}
-                    currentGameId={gameId}
-                    // Byte av aktiv match sker genom navigation till valt gameId.
-                    onSelectGame={(selectedGameId: string) => {
-                        if (selectedGameId === gameId) return;
-                        navigate(`/${selectedGameId}`);
-                    }}
-                />
-
-                <h2 className="text-2xl font-bold text-center mt-6 mb-4 text-slate-800">
-                </h2>
 
                 <AddPlayerForm onAddPlayer={handleAddPlayer} disabled={!canAddPlayers} />
 
