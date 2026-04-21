@@ -12,6 +12,7 @@ export function CreateGame() {
     // Lokalt state för nya matchens namn, spelare och om spelare får läggas till senare.
     const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
+    const [startScore, setStartScore] = useState(0);
     const [allowAddingPlayers, setAllowAddingPlayers] = useState(true);
     const navigate = useNavigate();
     const { saveGame } = useGameContext();
@@ -30,9 +31,19 @@ export function CreateGame() {
             {
                 id: crypto.randomUUID(),
                 name,
-                score: 0,
+                score: startScore,
             },
         ]);
+    };
+
+    // Uppdaterar startpoäng för alla spelare som redan lagts till.
+    const handleStartScoreChange = (value: string) => {
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isNaN(parsed)) return;
+
+        const nextStartScore = Math.max(0, parsed);
+        setStartScore(nextStartScore);
+        setPlayers((prev) => prev.map((player) => ({ ...player, score: nextStartScore })));
     };
 
     // Tar bort spelare från listan innan matchen skapas.
@@ -70,11 +81,33 @@ export function CreateGame() {
                 <div className="space-y-4">
                     <GameNameInput onSetName={setGameName} />
                     <AddPlayerForm onAddPlayer={addPlayer} />
+                    <div className="rounded-2xl border border-sky-200/60 bg-linear-to-r from-sky-50/70 via-white to-emerald-50/60 px-4 py-4 shadow-sm">
+                        <div className="mb-3 inline-flex items-center rounded-full border border-sky-200/70 bg-white/90 px-3 py-1">
+                            <span className="text-[11px] font-bold tracking-wide text-sky-700 uppercase">Poänginställning</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <p className="text-sm font-semibold text-slate-700">Startpoäng</p>
+                                <p className="text-xs text-slate-500">Gäller alla spelare innan spelet skapas</p>
+                            </div>
+                            <input
+                                type="number"
+                                min={0}
+                                step={1}
+                                value={startScore}
+                                onChange={(e) => handleStartScoreChange(e.target.value)}
+                                className="w-24 rounded-xl border border-slate-300 bg-white px-3 py-2 text-right text-sm font-semibold text-slate-800 shadow-sm transition-all focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                aria-label="Startpoäng för alla spelare"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="mt-8 space-y-3">
                     {players.length === 0 ? (
-                        <p className="text-center py-6 text-slate-500 text-sm italic">Inga spelare ännu...</p>
+                        <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 px-4 py-6 text-center text-sm font-medium text-slate-500">
+                            Inga spelare ännu. Lägg till en spelare för att börja bygga din match.
+                        </p>
                     ) : (
                         players.map((player) => (
                             <PlayerRow
@@ -86,8 +119,8 @@ export function CreateGame() {
                     )}
                 </div>
 
-                <div className="mt-8 space-y-4">
-                    <label className="flex items-center gap-3 p-3 rounded-lg bg-sky-50/50 border border-sky-200/50 cursor-pointer transition hover:bg-sky-50">
+                <div className="mt-8 space-y-4 rounded-2xl border border-slate-200/70 bg-linear-to-b from-white/80 to-slate-50/70 p-4 shadow-sm">
+                    <label className="flex items-center gap-3 rounded-xl border border-sky-200/60 bg-sky-50/70 p-3 cursor-pointer transition hover:bg-sky-50">
                         <input
                             type="checkbox"
                             checked={allowAddingPlayers}
@@ -101,7 +134,7 @@ export function CreateGame() {
 
                     <button
                         type="button"
-                        className="w-full inline-flex items-center justify-center bg-linear-to-b from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold shadow-lg transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-95"
+                        className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-r from-emerald-500 via-emerald-500 to-teal-500 px-6 py-4 font-bold text-white shadow-lg transition-all hover:from-emerald-600 hover:via-emerald-600 hover:to-teal-600 hover:shadow-xl active:scale-95"
                         onClick={handleCreate}
                     >
                         ✨ Starta spel

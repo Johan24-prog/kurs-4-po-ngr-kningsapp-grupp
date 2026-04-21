@@ -10,6 +10,7 @@ export function Game() {
     const { gamesById, ensureGame, addPlayer, removePlayer, changeScore } = useGameContext();
     const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
     const [customStep, setCustomStep] = useState<number>(5);
+    const [sortHighFirst, setSortHighFirst] = useState(true);
 
     // Säkerställer att spelobjektet finns även vid direktlänk till route.
     useEffect(() => {
@@ -24,6 +25,13 @@ export function Game() {
     // Fallback används om route finns men spelet ännu inte hunnit laddas in.
     const game = gamesById[gameId] ?? { gameName: "Spel", players: [] };
     const canAddPlayers = game.allowAddingPlayers ?? true;
+    const sortedPlayers = [...game.players].sort((a, b) => {
+        if (sortHighFirst) {
+            return b.score - a.score;
+        }
+
+        return a.score - b.score;
+    });
 
     // Lägger till spelare i aktuell match via context.
     const handleAddPlayer = (name: string) => {
@@ -111,13 +119,25 @@ export function Game() {
                             />
                         </div>
                     )}
+
+                    <label className="mt-3 flex items-center gap-3 rounded-xl border border-sky-200/60 bg-sky-50/70 p-3 cursor-pointer transition hover:bg-sky-50">
+                        <input
+                            type="checkbox"
+                            checked={sortHighFirst}
+                            onChange={(e) => setSortHighFirst(e.target.checked)}
+                            className="h-5 w-5 rounded border-sky-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-slate-700">
+                            Sortera efter höga poäng först (avmarkerad = låga poäng först)
+                        </span>
+                    </label>
                 </div>
 
                 <div className="mt-6 space-y-3">
                     {game.players.length === 0 ? (
                         <p className="text-center py-8 text-slate-500 text-sm">Inga spelare ännu. Lägg till en spelare för att börja!</p>
                     ) : (
-                        game.players.map((player) => (
+                        sortedPlayers.map((player) => (
                             <PlayerRow
                                 key={player.id}
                                 player={player}
