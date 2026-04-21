@@ -137,3 +137,5 @@ _NCrunch*
 *.db
 *.db-wal
 *.db-shm
+
+App/backend/wwwroot/**
