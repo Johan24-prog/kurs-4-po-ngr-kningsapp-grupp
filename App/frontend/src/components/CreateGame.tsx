@@ -87,14 +87,6 @@ export function CreateGame() {
                 </div>
 
                 <div className="mt-8 space-y-4">
-                    <button
-                        type="button"
-                        className="w-full inline-flex items-center justify-center bg-linear-to-b from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold shadow-lg transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-95"
-                        onClick={handleCreate}
-                    >
-                        ✨ Starta spel
-                    </button>
-
                     <label className="flex items-center gap-3 p-3 rounded-lg bg-sky-50/50 border border-sky-200/50 cursor-pointer transition hover:bg-sky-50">
                         <input
                             type="checkbox"
@@ -106,6 +98,14 @@ export function CreateGame() {
                             Tillåt att lägga till spelare efter att matchen skapats
                         </span>
                     </label>
+
+                    <button
+                        type="button"
+                        className="w-full inline-flex items-center justify-center bg-linear-to-b from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold shadow-lg transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl active:scale-95"
+                        onClick={handleCreate}
+                    >
+                        ✨ Starta spel
+                    </button>
                 </div>
 
             </div>
