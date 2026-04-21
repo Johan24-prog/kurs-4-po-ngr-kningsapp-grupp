@@ -142,18 +142,6 @@ export function Game() {
                     </Link>
                 </div>
 
-                {canAddPlayers && (
-                    <div className="mt-6">
-                        <AddPlayerForm onAddPlayer={handleAddPlayer} />
-                    </div>
-                )}
-
-                {!canAddPlayers && (
-                    <p className="mt-3 text-sm font-medium text-amber-700 bg-amber-50/70 px-4 py-2 rounded-lg border border-amber-200/50">
-                        Spelare kan inte läggas till efter att matchen har skapats.
-                    </p>
-                )}
-
                 <div className="mt-6 rounded-3xl border border-sky-200/60 bg-linear-to-b from-white via-sky-50/30 to-slate-50/70 p-4 shadow-lg sm:p-5">
                     <div className="mb-4 flex items-center justify-between gap-3">
                         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Inställningar</h2>
@@ -244,6 +232,18 @@ export function Game() {
                         </div>
                     )}
                 </div>
+
+                {canAddPlayers && (
+                    <div className="mt-6">
+                        <AddPlayerForm onAddPlayer={handleAddPlayer} />
+                    </div>
+                )}
+
+                {!canAddPlayers && (
+                    <p className="mt-6 text-sm font-medium text-amber-700 bg-amber-50/70 px-4 py-2 rounded-lg border border-amber-200/50">
+                        Spelare kan inte läggas till efter att matchen har skapats.
+                    </p>
+                )}
 
                 <div className="mt-6 space-y-3">
                     {game.players.length === 0 ? (
