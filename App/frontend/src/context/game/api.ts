@@ -107,3 +107,23 @@ export async function createOrUpdateGame(gameId: string, game: GameState) {
     console.error("Could not create or update game", error);
   }
 }
+
+// Tar bort ett spel från backend.
+export async function deleteGameById(gameId: string): Promise<boolean> {
+  try {
+    await enqueueGameWrite(gameId, async () => {
+      const response = await fetch(`/api/games/${gameId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok && response.status !== 404) {
+        throw new Error(`Failed to delete game ${gameId}: ${response.status}`);
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Could not delete game", error);
+    return false;
+  }
+}

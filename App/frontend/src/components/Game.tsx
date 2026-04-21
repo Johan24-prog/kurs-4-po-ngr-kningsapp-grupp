@@ -1,20 +1,36 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
+import { generateGameId } from "./guid";
+import type { GameState } from "../context/game/types";
 
 function isGuid(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+function cloneGameState(game: GameState): GameState {
+    return {
+        gameName: game.gameName,
+        higherIsBetter: game.higherIsBetter,
+        allowAddingPlayers: game.allowAddingPlayers,
+        players: game.players.map((player) => ({ ...player })),
+    };
+}
+
 // Visar en pågående match baserat på gameId i URL:en.
 export function Game() {
     const { gameId } = useParams();
-    const { gamesById, loadGame, addPlayer, removePlayer, changeScore } = useGameContext();
+    const navigate = useNavigate();
+    const { gamesById, loadGame, saveGame, overwriteGame, deleteGame, addPlayer, removePlayer, changeScore } = useGameContext();
     const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
     const [customStep, setCustomStep] = useState<number>(5);
     const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
+    const [newGameName, setNewGameName] = useState("");
+    const [isCreatingNewGame, setIsCreatingNewGame] = useState(false);
+    const [actionError, setActionError] = useState("");
+    const [originalGameById, setOriginalGameById] = useState<Record<string, GameState>>({});
 
     // Validerar gameId och laddar spel från backend om det inte redan finns i state.
     useEffect(() => {
@@ -42,6 +58,21 @@ export function Game() {
             cancelled = true;
         };
     }, [gameId, gamesById, loadGame]);
+
+    useEffect(() => {
+        if (!gameId) return;
+        const game = gamesById[gameId];
+        if (!game) return;
+
+        setOriginalGameById((prev) => {
+            if (prev[gameId]) return prev;
+
+            return {
+                ...prev,
+                [gameId]: cloneGameState(game),
+            };
+        });
+    }, [gameId, gamesById]);
 
     if (!gameId) {
         return <h1>Ogiltigt spel-id</h1>;
@@ -79,6 +110,8 @@ export function Game() {
         return null;
     }
 
+    const originalGame = originalGameById[gameId] ?? cloneGameState(game);
+
     const higherIsBetter = game.higherIsBetter ?? true;
     const canAddPlayers = game.allowAddingPlayers ?? true;
     const sortedPlayers = [...game.players].sort((a, b) => {
@@ -102,6 +135,37 @@ export function Game() {
     // Uppdaterar poäng för en specifik spelare.
     const handleChangeScore = (playerId: string, delta: number) => {
         changeScore(gameId, playerId, delta);
+    };
+
+    const handleRestartMatch = () => {
+        setActionError("");
+        overwriteGame(gameId, cloneGameState(originalGame));
+        setScoreMode("standard");
+        setCustomStep(5);
+    };
+
+    const handleCreateNewFromThis = async () => {
+        if (isCreatingNewGame) return;
+
+        setActionError("");
+        setIsCreatingNewGame(true);
+        const newId = generateGameId();
+        const targetName = newGameName.trim() || originalGame.gameName;
+        const clonedPlayers = originalGame.players.map((player) => ({
+            id: crypto.randomUUID(),
+            name: player.name,
+            score: player.score,
+        }));
+
+        saveGame(newId, targetName, clonedPlayers, originalGame.higherIsBetter, originalGame.allowAddingPlayers);
+        const deleted = await deleteGame(gameId);
+        if (!deleted) {
+            setActionError("Kunde inte rensa den gamla matchen. Försök igen.");
+            setIsCreatingNewGame(false);
+            return;
+        }
+
+        navigate(`/${newId}`);
     };
 
     return (
@@ -178,6 +242,45 @@ export function Game() {
                         </div>
                     )}
 
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm space-y-3">
+                    <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Matchhantering</p>
+
+                    <button
+                        type="button"
+                        onClick={handleRestartMatch}
+                        className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-b from-amber-500 to-amber-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-lg active:scale-95"
+                    >
+                        Starta om match
+                    </button>
+
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-3">
+                        <label htmlFor="newGameName" className="text-sm font-medium text-slate-700 block">
+                            Nytt matchnamn (valfritt)
+                        </label>
+                        <input
+                            id="newGameName"
+                            type="text"
+                            value={newGameName}
+                            onChange={(e) => setNewGameName(e.target.value)}
+                            placeholder={originalGame.gameName}
+                            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                        />
+
+                        <button
+                            type="button"
+                            onClick={handleCreateNewFromThis}
+                            disabled={isCreatingNewGame}
+                            className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-b from-sky-500 to-sky-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-sky-600 hover:to-sky-700 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                            {isCreatingNewGame ? "Skapar ny match..." : "Skapa ny match från denna"}
+                        </button>
+
+                        {actionError && (
+                            <p className="text-sm font-medium text-red-600">{actionError}</p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="mt-6 space-y-3">

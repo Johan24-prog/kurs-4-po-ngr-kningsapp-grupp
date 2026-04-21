@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { createOrUpdateGame, loadGameById, persistGame } from "./api";
+import { createOrUpdateGame, deleteGameById, loadGameById, persistGame } from "./api";
 import { getDefaultGame, type GameState, type GamesById } from "./types";
 import type { Player } from "../../components/types";
 
@@ -44,6 +44,28 @@ export function useGameActions({ setGamesById }: Props) {
     }));
 
     void createOrUpdateGame(gameId, nextGame);
+  }, [setGamesById]);
+
+  // Skriver över ett spel med nytt state och sparar till backend.
+  const overwriteGame = useCallback((gameId: string, game: GameState) => {
+    setGamesById((prev) => ({
+      ...prev,
+      [gameId]: game,
+    }));
+
+    void persistGame(gameId, game);
+  }, [setGamesById]);
+
+  // Tar bort ett spel i både lokalt state och backend.
+  const deleteGame = useCallback(async (gameId: string) => {
+    setGamesById((prev) => {
+      if (!prev[gameId]) return prev;
+
+      const { [gameId]: _removed, ...rest } = prev;
+      return rest;
+    });
+
+    return deleteGameById(gameId);
   }, [setGamesById]);
 
   // Ser till att spel finns i state och försöker sedan ladda serverversionen.
@@ -169,11 +191,13 @@ export function useGameActions({ setGamesById }: Props) {
       saveGame,
       ensureGame,
       loadGame,
+      overwriteGame,
+      deleteGame,
       setGameName,
       addPlayer,
       removePlayer,
       changeScore,
     }),
-    [saveGame, ensureGame, loadGame, setGameName, addPlayer, removePlayer, changeScore]
+    [saveGame, ensureGame, loadGame, overwriteGame, deleteGame, setGameName, addPlayer, removePlayer, changeScore]
   );
 }

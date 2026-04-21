@@ -142,6 +142,23 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
     return Results.Ok(ToGameResponse(existing));
 });
 
+// Tar bort ett spel och dess spelare.
+app.MapDelete("/api/games/{id:guid}", async (Guid id, AppDbContext db) =>
+{
+    var existing = await db.Games
+        .Include(g => g.Players)
+        .FirstOrDefaultAsync(g => g.Id == id);
+
+    if (existing is null)
+    {
+        return Results.NotFound();
+    }
+
+    db.Games.Remove(existing);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
 // Fallback: let React Router handle client-side routes
 app.MapFallbackToFile("index.html");
 
