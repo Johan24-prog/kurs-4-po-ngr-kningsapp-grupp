@@ -68,7 +68,7 @@ export function CreateGame() {
                         to="/"
                         className="text-sm font-medium text-slate-600 hover:text-sky-700 transition-colors px-4 py-2 rounded-lg hover:bg-sky-50"
                     >
-                        ← Tillbaka
+                        Till Startsidan
                     </Link>
                 </div>
 
