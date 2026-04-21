@@ -95,13 +95,44 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
     existing.Name = dto.GameName;
     existing.HigherIsBetter = dto.HigherIsBetter;
     existing.AllowAddingPlayers = dto.AllowAddingPlayers;
-    existing.Players = dto.Players?.Select(p => new Player
+
+    var incomingPlayers = dto.Players ?? new List<CreateOrUpdatePlayerDto>();
+    var incomingPlayerIds = new HashSet<string>();
+
+    foreach (var incoming in incomingPlayers)
     {
-        Id = string.IsNullOrWhiteSpace(p.Id) ? Guid.NewGuid().ToString() : p.Id,
-        GameId = existing.Id,
-        Name = p.Name,
-        Score = p.Score,
-    }).ToList() ?? new List<Player>();
+        var incomingId = string.IsNullOrWhiteSpace(incoming.Id)
+            ? Guid.NewGuid().ToString()
+            : incoming.Id;
+
+        incomingPlayerIds.Add(incomingId);
+
+        var existingPlayer = existing.Players.FirstOrDefault(p => p.Id == incomingId);
+        if (existingPlayer is null)
+        {
+            existing.Players.Add(new Player
+            {
+                Id = incomingId,
+                GameId = existing.Id,
+                Name = incoming.Name,
+                Score = incoming.Score,
+            });
+
+            continue;
+        }
+
+        existingPlayer.Name = incoming.Name;
+        existingPlayer.Score = incoming.Score;
+    }
+
+    var playersToRemove = existing.Players
+        .Where(player => !incomingPlayerIds.Contains(player.Id))
+        .ToList();
+
+    foreach (var playerToRemove in playersToRemove)
+    {
+        db.Players.Remove(playerToRemove);
+    }
 
     await hubContext.Clients
         .Group($"game-{id}")

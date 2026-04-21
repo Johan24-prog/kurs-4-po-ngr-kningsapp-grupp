@@ -35,14 +35,22 @@ export function useGameActions({ setGamesById }: Props) {
 
   // Ser till att spel finns i state och försöker sedan ladda serverversionen.
   const ensureGame = useCallback((gameId: string) => {
+    let shouldLoadFromServer = false;
+
     setGamesById((prev) => {
       if (prev[gameId]) return prev;
+
+      shouldLoadFromServer = true;
 
       return {
         ...prev,
         [gameId]: getDefaultGame(),
       };
     });
+
+    if (!shouldLoadFromServer) {
+      return;
+    }
 
     void (async () => {
       const game = await loadGameById(gameId);
