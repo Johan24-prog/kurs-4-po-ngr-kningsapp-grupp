@@ -120,9 +120,11 @@ export function Game() {
                     </Link>
                 </div>
 
-                <div className="mt-6">
-                    <AddPlayerForm onAddPlayer={handleAddPlayer} disabled={!canAddPlayers} />
-                </div>
+                {canAddPlayers && (
+                    <div className="mt-6">
+                        <AddPlayerForm onAddPlayer={handleAddPlayer} />
+                    </div>
+                )}
 
                 {!canAddPlayers && (
                     <p className="mt-3 text-sm font-medium text-amber-700 bg-amber-50/70 px-4 py-2 rounded-lg border border-amber-200/50">
