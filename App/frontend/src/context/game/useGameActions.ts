@@ -15,11 +15,13 @@ export function useGameActions({ setGamesById }: Props) {
     gameId: string,
     gameName: string,
     players: Player[],
+    higherIsBetter: boolean,
     allowAddingPlayers: boolean
   ) => {
     const nextGame: GameState = {
       gameName,
       players,
+      higherIsBetter,
       allowAddingPlayers,
     };
 

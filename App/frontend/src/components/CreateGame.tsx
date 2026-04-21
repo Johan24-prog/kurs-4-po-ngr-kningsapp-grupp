@@ -13,6 +13,7 @@ export function CreateGame() {
     const [gameName, setGameName] = useState("Nytt spel");
     const [players, setPlayers] = useState<Player[]>([]);
     const [startScore, setStartScore] = useState(0);
+    const [higherIsBetter, setHigherIsBetter] = useState(true);
     const [allowAddingPlayers, setAllowAddingPlayers] = useState(true);
     const navigate = useNavigate();
     const { saveGame } = useGameContext();
@@ -20,7 +21,7 @@ export function CreateGame() {
     const handleCreate = async () => {
         const gameId = generateGameId();
         
-        saveGame(gameId, gameName, players, allowAddingPlayers);
+        saveGame(gameId, gameName, players, higherIsBetter, allowAddingPlayers);
         navigate(`/${gameId}`);
     };
 
@@ -120,6 +121,18 @@ export function CreateGame() {
                 </div>
 
                 <div className="mt-8 space-y-4 rounded-2xl border border-slate-200/70 bg-linear-to-b from-white/80 to-slate-50/70 p-4 shadow-sm">
+                    <label className="flex items-center gap-3 rounded-xl border border-sky-200/60 bg-sky-50/70 p-3 cursor-pointer transition hover:bg-sky-50">
+                        <input
+                            type="checkbox"
+                            checked={higherIsBetter}
+                            onChange={(e) => setHigherIsBetter(e.target.checked)}
+                            className="h-5 w-5 rounded border-sky-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-slate-700">
+                            Sortera efter höga poäng först (avmarkerad = låga poäng först)
+                        </span>
+                    </label>
+
                     <label className="flex items-center gap-3 rounded-xl border border-sky-200/60 bg-sky-50/70 p-3 cursor-pointer transition hover:bg-sky-50">
                         <input
                             type="checkbox"

@@ -4,6 +4,7 @@ import type { Player } from "../../components/types";
 export type GameState = {
   gameName: string;
   players: Player[];
+  higherIsBetter: boolean;
   allowAddingPlayers: boolean;
 };
 
@@ -17,6 +18,7 @@ export type GameContextType = {
     gameId: string,
     gameName: string,
     players: Player[],
+    higherIsBetter: boolean,
     allowAddingPlayers: boolean
   ) => void;
   ensureGame: (gameId: string) => void;
@@ -30,6 +32,7 @@ export type GameContextType = {
 export type ApiGame = {
   id: string;
   gameName: string;
+  higherIsBetter: boolean;
   allowAddingPlayers: boolean;
   players: Player[];
 };
@@ -39,6 +42,7 @@ export function getDefaultGame(): GameState {
   return {
     gameName: "Spel",
     players: [],
+    higherIsBetter: true,
     allowAddingPlayers: true,
   };
 }
@@ -48,6 +52,7 @@ export function toGameState(apiGame: ApiGame): GameState {
   return {
     gameName: apiGame.gameName,
     players: apiGame.players,
+    higherIsBetter: apiGame.higherIsBetter,
     allowAddingPlayers: apiGame.allowAddingPlayers,
   };
 }
@@ -57,7 +62,7 @@ export function toApiPayload(gameId: string, game: GameState) {
   return {
     id: gameId,
     gameName: game.gameName,
-    higherIsBetter: true,
+    higherIsBetter: game.higherIsBetter,
     allowAddingPlayers: game.allowAddingPlayers,
     players: game.players,
   };
