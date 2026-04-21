@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
-import { generateGameId } from "./guid";
 
 function isGuid(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -12,14 +12,11 @@ function isGuid(value: string) {
 // Visar en pågående match baserat på gameId i URL:en.
 export function Game() {
     const { gameId } = useParams();
-    const navigate = useNavigate();
-    const { gamesById, loadGame, saveGame, overwriteGame, deleteGame, addPlayer, removePlayer, changeScore } = useGameContext();
+    const { gamesById, loadGame, overwriteGame, addPlayer, removePlayer, changeScore } = useGameContext();
     const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
     const [customStep, setCustomStep] = useState<number>(5);
     const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
-    const [newGameName, setNewGameName] = useState("");
-    const [isCreatingNewGame, setIsCreatingNewGame] = useState(false);
-    const [actionError, setActionError] = useState("");;
+    const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
     // Validerar gameId och laddar spel från backend om det inte redan finns i state.
     useEffect(() => {
@@ -110,7 +107,10 @@ export function Game() {
     };
 
     const handleRestartMatch = () => {
-        setActionError("");
+        setShowRestartConfirm(true);
+    };
+
+    const confirmRestartMatch = () => {
         const resetPlayers = game.players.map((player) => ({
             ...player,
             score: player.initialScore ?? 0,
@@ -121,35 +121,12 @@ export function Game() {
         });
         setScoreMode("standard");
         setCustomStep(5);
-    };
-
-    const handleCreateNewFromThis = async () => {
-        if (isCreatingNewGame) return;
-
-        setActionError("");
-        setIsCreatingNewGame(true);
-        const newId = generateGameId();
-        const targetName = newGameName.trim() || game.gameName;
-        const clonedPlayers = game.players.map((player) => ({
-            id: crypto.randomUUID(),
-            name: player.name,
-            score: player.initialScore ?? 0,
-            initialScore: player.initialScore ?? 0,
-        }));
-
-        saveGame(newId, targetName, clonedPlayers, game.higherIsBetter, game.allowAddingPlayers);
-        const deleted = await deleteGame(gameId);
-        if (!deleted) {
-            setActionError("Kunde inte rensa den gamla matchen. Försök igen.");
-            setIsCreatingNewGame(false);
-            return;
-        }
-
-        navigate(`/${newId}`);
+        setShowRestartConfirm(false);
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-start p-6 sm:p-8">
+        <>
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-start p-6 sm:p-8">
             <div className="w-full max-w-2xl bg-linear-to-b from-white to-slate-50/50 shadow-2xl rounded-3xl p-6 sm:p-8 border border-slate-200/50">
                 <div className="flex items-center justify-between gap-4 mb-6">
                     <div>
@@ -160,7 +137,7 @@ export function Game() {
                         to="/"
                         className="text-sm font-medium text-slate-600 hover:text-sky-700 transition-colors px-4 py-2 rounded-lg hover:bg-sky-50"
                     >
-                        ← Tillbaka
+                        Till startsidan
                     </Link>
                 </div>
 
@@ -234,33 +211,6 @@ export function Game() {
                     >
                         Starta om match
                     </button>
-
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-3">
-                        <label htmlFor="newGameName" className="text-sm font-medium text-slate-700 block">
-                            Nytt matchnamn (valfritt)
-                        </label>
-                        <input
-                            id="newGameName"
-                            type="text"
-                            value={newGameName}
-                            onChange={(e) => setNewGameName(e.target.value)}
-                            placeholder={game.gameName}
-                            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        />
-
-                        <button
-                            type="button"
-                            onClick={handleCreateNewFromThis}
-                            disabled={isCreatingNewGame}
-                            className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-b from-sky-500 to-sky-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-sky-600 hover:to-sky-700 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
-                        >
-                            {isCreatingNewGame ? "Skapar ny match..." : "Skapa ny match från denna"}
-                        </button>
-
-                        {actionError && (
-                            <p className="text-sm font-medium text-red-600">{actionError}</p>
-                        )}
-                    </div>
                 </div>
 
                 <div className="mt-6 space-y-3">
@@ -280,6 +230,17 @@ export function Game() {
                 </div>
             </div>
         </div>
+            <ConfirmDialog
+                isOpen={showRestartConfirm}
+                title="Starta om match"
+                message="Vill du verkligen starta om matchen? Alla spelares poäng återställs till startpoäng."
+                confirmText="Starta om"
+                cancelText="Avbryt"
+                confirmVariant="warning"
+                onCancel={() => setShowRestartConfirm(false)}
+                onConfirm={confirmRestartMatch}
+            />
+        </>
     );
 }
 
