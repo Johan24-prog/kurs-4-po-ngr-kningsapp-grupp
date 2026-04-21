@@ -35,6 +35,11 @@ export function CreateGame() {
         ]);
     };
 
+    // Tar bort spelare från listan innan matchen skapas.
+    const removePlayer = (playerId: string) => {
+        setPlayers((prev) => prev.filter((player) => player.id !== playerId));
+    };
+
     // Visar formulär för matchuppsättning och sammanställning av tillagda spelare.
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-start p-6 sm:p-8">
@@ -75,6 +80,7 @@ export function CreateGame() {
                             <PlayerRow
                                 key={player.id}
                                 player={player}
+                                onRemovePlayer={removePlayer}
                             />
                         ))
                     )}
