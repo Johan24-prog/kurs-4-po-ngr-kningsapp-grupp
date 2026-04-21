@@ -22,6 +22,7 @@ export type GameContextType = {
     allowAddingPlayers: boolean
   ) => void;
   ensureGame: (gameId: string) => void;
+  loadGame: (gameId: string) => Promise<boolean>;
   setGameName: (gameId: string, gameName: string) => void;
   addPlayer: (gameId: string, playerName: string) => void;
   removePlayer: (gameId: string, playerId: string) => void;

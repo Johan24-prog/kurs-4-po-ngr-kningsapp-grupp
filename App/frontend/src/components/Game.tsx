@@ -4,25 +4,81 @@ import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
 
+function isGuid(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 // Visar en pågående match baserat på gameId i URL:en.
 export function Game() {
     const { gameId } = useParams();
-    const { gamesById, ensureGame, addPlayer, removePlayer, changeScore } = useGameContext();
+    const { gamesById, loadGame, addPlayer, removePlayer, changeScore } = useGameContext();
     const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
     const [customStep, setCustomStep] = useState<number>(5);
+    const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
 
-    // Säkerställer att spelobjektet finns även vid direktlänk till route.
+    // Validerar gameId och laddar spel från backend om det inte redan finns i state.
     useEffect(() => {
-        if (!gameId) return;
-        ensureGame(gameId);
-    }, [ensureGame, gameId]);
+        if (!gameId || !isGuid(gameId)) {
+            setStatus("not-found");
+            return;
+        }
+
+        if (gamesById[gameId]) {
+            setStatus("ready");
+            return;
+        }
+
+        let cancelled = false;
+        setStatus("loading");
+
+        void (async () => {
+            const found = await loadGame(gameId);
+            if (cancelled) return;
+
+            setStatus(found ? "ready" : "not-found");
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [gameId, gamesById, loadGame]);
 
     if (!gameId) {
         return <h1>Ogiltigt spel-id</h1>;
     }
 
-    // Fallback används om route finns men spelet ännu inte hunnit laddas in.
-    const game = gamesById[gameId] ?? { gameName: "Spel", players: [] };
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-start p-6 sm:p-8">
+                <div className="w-full max-w-2xl bg-linear-to-b from-white to-slate-50/50 shadow-2xl rounded-3xl p-6 sm:p-8 border border-slate-200/50 text-center">
+                    <p className="text-slate-600 font-medium">Laddar spel...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === "not-found") {
+        return (
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-sky-50 to-slate-100 flex justify-center items-start p-6 sm:p-8">
+                <div className="w-full max-w-2xl bg-linear-to-b from-white to-slate-50/50 shadow-2xl rounded-3xl p-6 sm:p-8 border border-slate-200/50 text-center">
+                    <h1 className="text-3xl font-bold bg-linear-to-r from-slate-900 to-sky-700 bg-clip-text text-transparent">404 - Spelet hittades inte</h1>
+                    <p className="mt-3 text-slate-600">Kontrollera länken eller skapa ett nytt spel.</p>
+                    <Link
+                        to="/"
+                        className="mt-6 inline-flex items-center justify-center rounded-xl bg-linear-to-b from-sky-500 to-sky-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-sky-600 hover:to-sky-700 hover:shadow-lg active:scale-95"
+                    >
+                        Till startsidan
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    const game = gamesById[gameId];
+    if (!game) {
+        return null;
+    }
+
     const higherIsBetter = game.higherIsBetter ?? true;
     const canAddPlayers = game.allowAddingPlayers ?? true;
     const sortedPlayers = [...game.players].sort((a, b) => {

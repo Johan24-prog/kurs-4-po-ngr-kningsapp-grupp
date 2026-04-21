@@ -10,6 +10,19 @@ type Props = {
 
 // Samlar alla state-ändringar för spel till ett ställe.
 export function useGameActions({ setGamesById }: Props) {
+  // Laddar spel från backend och skriver in i state om det finns.
+  const loadGame = useCallback(async (gameId: string) => {
+    const game = await loadGameById(gameId);
+    if (!game) return false;
+
+    setGamesById((prev) => ({
+      ...prev,
+      [gameId]: game,
+    }));
+
+    return true;
+  }, [setGamesById]);
+
   // Skapar eller skriver över ett spel och synkar mot backend.
   const saveGame = useCallback((
     gameId: string,
@@ -35,33 +48,12 @@ export function useGameActions({ setGamesById }: Props) {
 
   // Ser till att spel finns i state och försöker sedan ladda serverversionen.
   const ensureGame = useCallback((gameId: string) => {
-    let shouldLoadFromServer = false;
-
     setGamesById((prev) => {
       if (prev[gameId]) return prev;
-
-      shouldLoadFromServer = true;
-
-      return {
-        ...prev,
-        [gameId]: getDefaultGame(),
-      };
+      void loadGame(gameId);
+      return prev;
     });
-
-    if (!shouldLoadFromServer) {
-      return;
-    }
-
-    void (async () => {
-      const game = await loadGameById(gameId);
-      if (!game) return;
-
-      setGamesById((prev) => ({
-        ...prev,
-        [gameId]: game,
-      }));
-    })();
-  }, [setGamesById]);
+  }, [setGamesById, loadGame]);
 
   // Uppdaterar endast spelnamn.
   const setGameName = useCallback((gameId: string, gameName: string) => {
@@ -176,11 +168,12 @@ export function useGameActions({ setGamesById }: Props) {
     () => ({
       saveGame,
       ensureGame,
+      loadGame,
       setGameName,
       addPlayer,
       removePlayer,
       changeScore,
     }),
-    [saveGame, ensureGame, setGameName, addPlayer, removePlayer, changeScore]
+    [saveGame, ensureGame, loadGame, setGameName, addPlayer, removePlayer, changeScore]
   );
 }
