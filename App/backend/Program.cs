@@ -136,11 +136,12 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
         db.Players.Remove(playerToRemove);
     }
 
+    await db.SaveChangesAsync();
+
     await hubContext.Clients
         .Group($"game-{id}")
         .SendAsync("GameUpdated");
 
-    await db.SaveChangesAsync();
     return Results.Ok(ToGameResponse(existing));
 });
 

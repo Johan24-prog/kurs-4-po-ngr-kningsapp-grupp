@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import * as signalR from "@microsoft/signalr";
 import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -45,6 +46,48 @@ export function Game() {
             cancelled = true;
         };
     }, [gameId, gamesById, loadGame]);
+
+    // Prenumererar på realtidsuppdateringar för aktuell match via SignalR.
+    useEffect(() => {
+        if (!gameId || !isGuid(gameId)) {
+            return;
+        }
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/gamehub")
+            .withAutomaticReconnect()
+            .build();
+
+        let isMounted = true;
+
+        connection.on("GameUpdated", () => {
+            if (!isMounted) return;
+
+            void loadGame(gameId);
+        });
+
+        connection.onreconnected(() => connection.invoke("JoinGame", gameId));
+
+        void connection
+            .start()
+            .then(() => connection.invoke("JoinGame", gameId))
+            .catch((error) => {
+                console.error("Could not connect to game hub", error);
+            });
+
+        return () => {
+            isMounted = false;
+
+            void connection
+                .invoke("LeaveGame", gameId)
+                .catch(() => {
+                    // Ignore leave failures during teardown.
+                })
+                .finally(() => {
+                    void connection.stop();
+                });
+        };
+    }, [gameId, loadGame]);
 
     if (!gameId) {
         return <h1>Ogiltigt spel-id</h1>;
