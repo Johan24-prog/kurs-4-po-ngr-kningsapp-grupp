@@ -16,11 +16,11 @@ export function LandingPage() {
                 <p className="text-xs font-bold uppercase tracking-widest text-sky-700 mb-2">Poängräknare</p>
                 <h1 className="text-5xl font-bold mt-2 mb-3 bg-linear-to-r from-slate-900 to-sky-700 bg-clip-text text-transparent">Välkommen!</h1>
                 <p className="text-lg mb-8 text-slate-600 leading-relaxed">
-                    Skapa ett spel, lägg till spelare och börja räkna poäng direkt. Enkelt och snabbt!
+                    Skapa ett spel, lägg till spelare och börja räkna poäng.
                 </p>
 
                 <div className="mb-6 p-4 rounded-2xl bg-sky-50/50 border border-sky-200/50">
-                    <p className="mb-3 text-sm font-bold text-sky-700 uppercase tracking-wide">📋 Fortsätt ett befintligt spel</p>
+                    <p className="mb-3 text-sm font-bold text-sky-700 uppercase tracking-wide">Fortsätt ett befintligt spel</p>
                     <GameSearchInput
                         gamesById={gamesById}
                         currentGameId=""
