@@ -118,6 +118,7 @@ export function useGameActions({ setGamesById }: Props) {
             id: crypto.randomUUID(),
             name: trimmedName,
             score: 0,
+            initialScore: 0,
           },
         ],
       };

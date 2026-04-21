@@ -33,6 +33,7 @@ export function CreateGame() {
                 id: crypto.randomUUID(),
                 name,
                 score: startScore,
+                initialScore: startScore,
             },
         ]);
     };
@@ -44,7 +45,7 @@ export function CreateGame() {
 
         const nextStartScore = Math.max(0, parsed);
         setStartScore(nextStartScore);
-        setPlayers((prev) => prev.map((player) => ({ ...player, score: nextStartScore })));
+        setPlayers((prev) => prev.map((player) => ({ ...player, score: nextStartScore, initialScore: nextStartScore })));
     };
 
     // Tar bort spelare från listan innan matchen skapas.

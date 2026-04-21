@@ -116,6 +116,7 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
                 GameId = existing.Id,
                 Name = incoming.Name,
                 Score = incoming.Score,
+                InitialScore = incoming.InitialScore,
             });
 
             continue;
@@ -123,6 +124,7 @@ app.MapPut("/api/games/{id:guid}", async (Guid id, CreateOrUpdateGameDto dto, Ap
 
         existingPlayer.Name = incoming.Name;
         existingPlayer.Score = incoming.Score;
+        // InitialScore bibehålls från innan om det inte ändrats
     }
 
     var playersToRemove = existing.Players
@@ -180,6 +182,7 @@ static Game ToGameEntity(CreateOrUpdateGameDto dto)
             GameId = dto.Id,
             Name = p.Name,
             Score = p.Score,
+            InitialScore = p.InitialScore,
         }).ToList() ?? new List<Player>()
     };
 }
@@ -192,7 +195,7 @@ static GameResponseDto ToGameResponse(Game game)
         game.Name,
         game.HigherIsBetter,
         game.AllowAddingPlayers,
-        game.Players.Select(p => new PlayerResponseDto(p.Id, p.Name, p.Score)).ToList()
+        game.Players.Select(p => new PlayerResponseDto(p.Id, p.Name, p.Score, p.InitialScore)).ToList()
     );
 }
 
@@ -206,11 +209,12 @@ public record CreateOrUpdateGameDto(
     List<CreateOrUpdatePlayerDto>? Players
 );
 
-// DTO för att skapa eller uppdatera en spelare. Inkluderar Id (för uppdatering), namn och poäng.
+// DTO för att skapa eller uppdatera en spelare. Inkluderar Id (för uppdatering), namn, aktuell poäng och startpoäng.
 public record CreateOrUpdatePlayerDto(
     string Id,
     string Name,
-    int Score
+    int Score,
+    int InitialScore
 );
 
 // DTO för att representera ett spel i API-responsen. Inkluderar spelets Id, namn, regler och en lista över spelare.
@@ -222,9 +226,10 @@ public record GameResponseDto(
     List<PlayerResponseDto> Players
 );
 
-// DTO för att representera en spelare i API-responsen. Inkluderar spelarens Id, namn och poäng.
+// DTO för att representera en spelare i API-responsen. Inkluderar spelarens Id, namn, aktuell poäng och startpoäng.
 public record PlayerResponseDto(
     string Id,
     string Name,
-    int Score
+    int Score,
+    int InitialScore
 );

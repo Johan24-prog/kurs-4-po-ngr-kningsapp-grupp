@@ -4,19 +4,9 @@ import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerRow } from "./PlayerRow";
 import { useGameContext } from "../context/GameContext";
 import { generateGameId } from "./guid";
-import type { GameState } from "../context/game/types";
 
 function isGuid(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-
-function cloneGameState(game: GameState): GameState {
-    return {
-        gameName: game.gameName,
-        higherIsBetter: game.higherIsBetter,
-        allowAddingPlayers: game.allowAddingPlayers,
-        players: game.players.map((player) => ({ ...player })),
-    };
 }
 
 // Visar en pågående match baserat på gameId i URL:en.
@@ -29,8 +19,7 @@ export function Game() {
     const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
     const [newGameName, setNewGameName] = useState("");
     const [isCreatingNewGame, setIsCreatingNewGame] = useState(false);
-    const [actionError, setActionError] = useState("");
-    const [originalGameById, setOriginalGameById] = useState<Record<string, GameState>>({});
+    const [actionError, setActionError] = useState("");;
 
     // Validerar gameId och laddar spel från backend om det inte redan finns i state.
     useEffect(() => {
@@ -58,21 +47,6 @@ export function Game() {
             cancelled = true;
         };
     }, [gameId, gamesById, loadGame]);
-
-    useEffect(() => {
-        if (!gameId) return;
-        const game = gamesById[gameId];
-        if (!game) return;
-
-        setOriginalGameById((prev) => {
-            if (prev[gameId]) return prev;
-
-            return {
-                ...prev,
-                [gameId]: cloneGameState(game),
-            };
-        });
-    }, [gameId, gamesById]);
 
     if (!gameId) {
         return <h1>Ogiltigt spel-id</h1>;
@@ -110,8 +84,6 @@ export function Game() {
         return null;
     }
 
-    const originalGame = originalGameById[gameId] ?? cloneGameState(game);
-
     const higherIsBetter = game.higherIsBetter ?? true;
     const canAddPlayers = game.allowAddingPlayers ?? true;
     const sortedPlayers = [...game.players].sort((a, b) => {
@@ -139,7 +111,14 @@ export function Game() {
 
     const handleRestartMatch = () => {
         setActionError("");
-        overwriteGame(gameId, cloneGameState(originalGame));
+        const resetPlayers = game.players.map((player) => ({
+            ...player,
+            score: player.initialScore ?? 0,
+        }));
+        overwriteGame(gameId, {
+            ...game,
+            players: resetPlayers,
+        });
         setScoreMode("standard");
         setCustomStep(5);
     };
@@ -150,14 +129,15 @@ export function Game() {
         setActionError("");
         setIsCreatingNewGame(true);
         const newId = generateGameId();
-        const targetName = newGameName.trim() || originalGame.gameName;
-        const clonedPlayers = originalGame.players.map((player) => ({
+        const targetName = newGameName.trim() || game.gameName;
+        const clonedPlayers = game.players.map((player) => ({
             id: crypto.randomUUID(),
             name: player.name,
-            score: player.score,
+            score: player.initialScore ?? 0,
+            initialScore: player.initialScore ?? 0,
         }));
 
-        saveGame(newId, targetName, clonedPlayers, originalGame.higherIsBetter, originalGame.allowAddingPlayers);
+        saveGame(newId, targetName, clonedPlayers, game.higherIsBetter, game.allowAddingPlayers);
         const deleted = await deleteGame(gameId);
         if (!deleted) {
             setActionError("Kunde inte rensa den gamla matchen. Försök igen.");
@@ -264,7 +244,7 @@ export function Game() {
                             type="text"
                             value={newGameName}
                             onChange={(e) => setNewGameName(e.target.value)}
-                            placeholder={originalGame.gameName}
+                            placeholder={game.gameName}
                             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
                         />
 

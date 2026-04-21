@@ -67,6 +67,11 @@ export function toApiPayload(gameId: string, game: GameState) {
     gameName: game.gameName,
     higherIsBetter: game.higherIsBetter,
     allowAddingPlayers: game.allowAddingPlayers,
-    players: game.players,
+    players: game.players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      score: p.score,
+      initialScore: p.initialScore ?? p.score,
+    })),
   };
 }
