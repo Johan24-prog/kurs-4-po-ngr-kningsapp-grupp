@@ -5,10 +5,11 @@ type Props = {
   player: Player;
   onChangeScore?: (id: string, delta: number) => void;
   onRemovePlayer?: (id: string) => void;
+  scoreStep?: number;
 };
 
 // Presentationskomponent för spelarnamn/poäng och valfria knappar för poängändring/borttagning.
-export function PlayerRow({ player, onChangeScore, onRemovePlayer }: Props) {
+export function PlayerRow({ player, onChangeScore, onRemovePlayer, scoreStep = 1 }: Props) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-linear-to-r from-slate-50 to-sky-50/30 p-4 shadow-sm transition-all hover:shadow-md hover:border-sky-200">
       <div className="flex-1">
@@ -23,16 +24,19 @@ export function PlayerRow({ player, onChangeScore, onRemovePlayer }: Props) {
               <button
                 type="button"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-b from-rose-500 to-rose-600 text-lg font-bold text-white shadow-md transition-all hover:from-rose-600 hover:to-rose-700 hover:shadow-lg active:scale-95"
-                onClick={() => onChangeScore(player.id, -1)}
-                aria-label={`Minska poäng för ${player.name}`}
+                onClick={() => onChangeScore(player.id, -scoreStep)}
+                aria-label={`Minska poäng för ${player.name} med ${scoreStep}`}
               >
                 −
               </button>
+              <span className="min-w-8 text-center text-sm font-semibold text-slate-500 select-none">
+                {scoreStep}
+              </span>
               <button
                 type="button"
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-b from-emerald-500 to-emerald-600 text-lg font-bold text-white shadow-md transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg active:scale-95"
-                onClick={() => onChangeScore(player.id, 1)}
-                aria-label={`Öka poäng för ${player.name}`}
+                onClick={() => onChangeScore(player.id, scoreStep)}
+                aria-label={`Öka poäng för ${player.name} med ${scoreStep}`}
               >
                 +
               </button>

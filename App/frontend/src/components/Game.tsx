@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerRow } from "./PlayerRow";
@@ -8,6 +8,8 @@ import { useGameContext } from "../context/GameContext";
 export function Game() {
     const { gameId } = useParams();
     const { gamesById, ensureGame, addPlayer, removePlayer, changeScore } = useGameContext();
+    const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
+    const [customStep, setCustomStep] = useState<number>(5);
 
     // Säkerställer att spelobjektet finns även vid direktlänk till route.
     useEffect(() => {
@@ -64,7 +66,54 @@ export function Game() {
                     </p>
                 )}
 
-                <div className="mt-8 space-y-3">
+                {/* Poänginställningar */}
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm">
+                    <p className="mb-3 text-sm font-semibold text-slate-600 uppercase tracking-wide">Poänginställning</p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setScoreMode("standard")}
+                            className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
+                                scoreMode === "standard"
+                                    ? "bg-linear-to-b from-sky-500 to-sky-600 text-white shadow-md"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            }`}
+                        >
+                            Standard (+1)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setScoreMode("custom")}
+                            className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
+                                scoreMode === "custom"
+                                    ? "bg-linear-to-b from-emerald-500 to-emerald-600 text-white shadow-md"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                            }`}
+                        >
+                            Anpassat
+                        </button>
+                    </div>
+                    {scoreMode === "custom" && (
+                        <div className="mt-3 flex items-center gap-3">
+                            <label htmlFor="customStep" className="text-sm font-medium text-slate-600 whitespace-nowrap">
+                                Steg per poäng
+                            </label>
+                            <input
+                                id="customStep"
+                                type="number"
+                                min={1}
+                                value={customStep}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value, 10);
+                                    if (!isNaN(val) && val >= 1) setCustomStep(val);
+                                }}
+                                className="w-24 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-sm font-bold text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-6 space-y-3">
                     {game.players.length === 0 ? (
                         <p className="text-center py-8 text-slate-500 text-sm">Inga spelare ännu. Lägg till en spelare för att börja!</p>
                     ) : (
@@ -74,6 +123,7 @@ export function Game() {
                                 player={player}
                                 onRemovePlayer={handleRemovePlayer}
                                 onChangeScore={handleChangeScore}
+                                scoreStep={scoreMode === "custom" ? customStep : 1}
                             />
                         ))
                     )}
