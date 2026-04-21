@@ -9,20 +9,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=scoreboard.db"));
 
 builder.Services.AddSignalR();
-//this was needed to connect to SignalR from "a different origin"
-//which i assume is because i was testing it with a seperate html file
-//Try removing CORS later when SignalR is implemented in frontend to see if it still works
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .SetIsOriginAllowed(_ => true);
-    });
-});
 
 var app = builder.Build();
 
@@ -35,7 +21,6 @@ using (var scope = app.Services.CreateScope())
 // Serve React build output from wwwroot
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseCors();
 
 // --- Minimal API endpoints ---
 app.MapHub<GameHub>("/gamehub");
