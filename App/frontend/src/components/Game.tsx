@@ -14,6 +14,7 @@ export function Game() {
     const { gameId } = useParams();
     const { gamesById, loadGame, overwriteGame, addPlayer, removePlayer, changeScore } = useGameContext();
     const [scoreMode, setScoreMode] = useState<"standard" | "custom">("standard");
+    const [settingsTab, setSettingsTab] = useState<"score" | "match">("score");
     const [customStep, setCustomStep] = useState<number>(5);
     const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
     const [showRestartConfirm, setShowRestartConfirm] = useState(false);
@@ -153,64 +154,95 @@ export function Game() {
                     </p>
                 )}
 
-                {/* Poänginställningar */}
-                <div className="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm">
-                    <p className="mb-3 text-sm font-semibold text-slate-600 uppercase tracking-wide">Poänginställning</p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setScoreMode("standard")}
-                            className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
-                                scoreMode === "standard"
-                                    ? "bg-linear-to-b from-sky-500 to-sky-600 text-white shadow-md"
-                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            }`}
-                        >
-                            Standard (+1)
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setScoreMode("custom")}
-                            className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
-                                scoreMode === "custom"
-                                    ? "bg-linear-to-b from-emerald-500 to-emerald-600 text-white shadow-md"
-                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            }`}
-                        >
-                            Anpassat
-                        </button>
+                <div className="mt-6 rounded-3xl border border-sky-200/60 bg-linear-to-b from-white via-sky-50/30 to-slate-50/70 p-4 shadow-lg sm:p-5">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-700">Inställningar</h2>
+                        <div className="inline-flex rounded-xl border border-slate-200 bg-white/80 p-1 shadow-sm">
+                            <button
+                                type="button"
+                                onClick={() => setSettingsTab("score")}
+                                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                                    settingsTab === "score"
+                                        ? "bg-linear-to-b from-sky-500 to-sky-600 text-white shadow"
+                                        : "text-slate-600 hover:bg-slate-100"
+                                }`}
+                            >
+                                Poäng
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSettingsTab("match")}
+                                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+                                    settingsTab === "match"
+                                        ? "bg-linear-to-b from-emerald-500 to-emerald-600 text-white shadow"
+                                        : "text-slate-600 hover:bg-slate-100"
+                                }`}
+                            >
+                                Match
+                            </button>
+                        </div>
                     </div>
-                    {scoreMode === "custom" && (
-                        <div className="mt-3 flex items-center gap-3">
-                            <label htmlFor="customStep" className="text-sm font-medium text-slate-600 whitespace-nowrap">
-                                Steg per poäng
-                            </label>
-                            <input
-                                id="customStep"
-                                type="number"
-                                min={1}
-                                value={customStep}
-                                onChange={(e) => {
-                                    const val = parseInt(e.target.value, 10);
-                                    if (!isNaN(val) && val >= 1) setCustomStep(val);
-                                }}
-                                className="w-24 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-sm font-bold text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
+
+                    {settingsTab === "score" && (
+                        <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm">
+                            <p className="mb-3 text-sm font-semibold text-slate-600 uppercase tracking-wide">Poänginställning</p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setScoreMode("standard")}
+                                    className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
+                                        scoreMode === "standard"
+                                            ? "bg-linear-to-b from-sky-500 to-sky-600 text-white shadow-md"
+                                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                    }`}
+                                >
+                                    Standard (+1)
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setScoreMode("custom")}
+                                    className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-all ${
+                                        scoreMode === "custom"
+                                            ? "bg-linear-to-b from-emerald-500 to-emerald-600 text-white shadow-md"
+                                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                    }`}
+                                >
+                                    Anpassat
+                                </button>
+                            </div>
+                            {scoreMode === "custom" && (
+                                <div className="mt-3 flex items-center gap-3">
+                                    <label htmlFor="customStep" className="text-sm font-medium text-slate-600 whitespace-nowrap">
+                                        Steg per poäng
+                                    </label>
+                                    <input
+                                        id="customStep"
+                                        type="number"
+                                        min={1}
+                                        value={customStep}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value, 10);
+                                            if (!isNaN(val) && val >= 1) setCustomStep(val);
+                                        }}
+                                        className="w-24 rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-sm font-bold text-slate-800 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
 
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm space-y-3">
-                    <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Matchhantering</p>
-
-                    <button
-                        type="button"
-                        onClick={handleRestartMatch}
-                        className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-b from-amber-500 to-amber-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-lg active:scale-95"
-                    >
-                        Starta om match
-                    </button>
+                    {settingsTab === "match" && (
+                        <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm space-y-3">
+                            <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Matchhantering</p>
+                            <button
+                                type="button"
+                                onClick={handleRestartMatch}
+                                className="w-full inline-flex items-center justify-center rounded-xl bg-linear-to-b from-amber-500 to-amber-600 px-5 py-3 font-bold text-white shadow-md transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-lg active:scale-95"
+                            >
+                                Starta om match
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-6 space-y-3">
