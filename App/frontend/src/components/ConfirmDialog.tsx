@@ -13,7 +13,7 @@ export function ConfirmDialog({
   isOpen,
   title,
   message,
-  confirmText = "Bekrafta",
+  confirmText = "Bekräfta",
   cancelText = "Avbryt",
   confirmVariant = "warning",
   onConfirm,

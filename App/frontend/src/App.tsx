@@ -26,4 +26,8 @@ export default function App() {
   );
 }
 
+// Routes och Route används för att definiera olika URL-vägar i appen och vilka komponenter som ska renderas för varje väg.
+// LandingPage, CreateGame och Game är komponenter som representerar olika sidor i appen.
+// Den sista Route med path="*" fångar alla ogiltiga URL:er och visar en "Sidan hittades inte" sida.
+
 
